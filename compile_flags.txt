@@ -1,0 +1,10 @@
+--target=x86_64-w64-mingw32
+
+-I/usr/x86_64-w64-mingw32/include
+-I/usr/lib/gcc/x86_64-w64-mingw32/*/include
+
+-I/opt/wxWidgets/include
+-I/opt/wxWidgets/build-mingw/lib/wx/include/x86_64-w64-mingw32-msw-unicode-static-3.2
+
+-D_FILE_OFFSET_BITS=64
+-D__WXMSW__

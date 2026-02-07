@@ -1,0 +1,11 @@
+# Build
+/build/
+
+# SQLite
+*.db
+
+# i18n
+*.mo
+
+# res
+*.res

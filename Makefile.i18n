@@ -1,0 +1,37 @@
+# make -f Makefile.i18n extract
+# 変数定義
+XGETTEXT = xgettext
+PACKAGE_NAME = mb
+OUTPUT_POT = $(PACKAGE_NAME).pot
+SOURCES = $(shell find src -name "*.cpp" -o -name "*.hpp")
+
+# デフォルトのターゲット
+all: extract
+
+# 翻訳テンプレートの抽出
+extract:
+	$(XGETTEXT) \
+		--language=C++ \
+		--keyword=_ \
+		--from-code=UTF-8 \
+		-o $(OUTPUT_POT) \
+		$(SOURCES)
+
+	msgmerge -U locale/ja/LC_MESSAGES/mb.po mb.pot || true
+	msgmerge -U locale/en/LC_MESSAGES/mb.po mb.pot || true
+
+	msgfmt locale/ja/LC_MESSAGES/mb.po -o locale/ja/LC_MESSAGES/mb.mo
+	msgfmt locale/en/LC_MESSAGES/mb.po -o locale/en/LC_MESSAGES/mb.mo
+
+
+# make -f Makefile.i18n msginit
+# 初めて翻訳ファイルをつくとき
+msginit:
+	msginit -i mb.pot -l ja -o locale/ja/LC_MESSAGES/mb.po
+	msginit -i mb.pot -l en -o locale/en/LC_MESSAGES/mb.po
+
+# 生成されたファイルを削除するクリーンアップ用
+clean:
+	rm -f $(OUTPUT_POT)
+
+.PHONY: all extract clean
