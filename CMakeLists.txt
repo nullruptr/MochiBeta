@@ -2,10 +2,15 @@
 cmake_minimum_required(VERSION 3.14)
 project(MochiBeta)
 
+# clangd が .rsp を読み込まないため、.rspを使用しないようにする。
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
+
+
 # find_package は「外部ライブラリを探す」命令。wxWidgets の中でも core base コンポーネントを使用する，という意味
 # 成功すると， インクルードパス、リンクすべきライブラリ一覧が自動で変数に入る．
 find_package(wxWidgets COMPONENTS core base)
-# wxWidgets 用のビルド設定を一括で有効化するための定型処理
+
 include(${wxWidgets_USE_FILE})
 
 # --- SQLite3 を探す ---
@@ -16,10 +21,11 @@ find_library(SQLITE3_LIB sqlite3)
 
 # ソースを列挙
 set(SOURCES 
-    src/ui/record_window.cpp
-    src/ui/time_log.cpp
-    src/main.cpp 
-    resource.rc
+	src/db/database.cpp
+	src/record/record_window.cpp
+	src/time_log/time_log.cpp
+	src/main.cpp 
+	resource.rc
 )
 
 # 実行ファイルを作る
@@ -29,7 +35,12 @@ add_executable(MochiBeta WIN32 ${SOURCES})
 # C++14 を使う
 target_compile_features(MochiBeta PUBLIC cxx_std_14)
 
-#wxWidgets と SQLite3 を MochiBeta にリンクする
+# インクルードディレクトリの設定
+target_include_directories(MochiBeta
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+)
+
 # find_package や find_library で見つけた結果をここで使用する
 target_link_libraries(MochiBeta ${wxWidgets_LIBRARIES} ${SQLITE3_LIB})
 

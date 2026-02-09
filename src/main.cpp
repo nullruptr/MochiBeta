@@ -1,6 +1,6 @@
 #include <wx/wx.h>
 #include "main.hpp"
-#include "ui/time_log.hpp"
+#include "time_log/time_log.hpp"
 #include "wx/language.h"
 #include <wx/intl.h>
 

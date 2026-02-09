@@ -1,5 +1,5 @@
-# Build
-/build/
+# Build (build + 何かの文字 のディレクトリを除外)
+/build*/
 
 # SQLite
 *.db
@@ -9,3 +9,7 @@
 
 # res
 *.res
+
+# compile_commands
+compile_commands.json
+compile_commands.txt

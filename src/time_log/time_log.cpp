@@ -1,9 +1,8 @@
-#include <windows.h>
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
-#include "record_window.hpp"
+#include "record/record_window.hpp"
 
 enum{
 	ID_TREE_EDIT
@@ -20,7 +19,7 @@ TimeLog::TimeLog(wxWindow* parent)
 		false,
 		wxT("ＭＳ 明朝")
 	);
-
+	
 	wxBoxSizer* sizermain = new wxBoxSizer(wxVERTICAL); // メインサイザ
 	wxSplitterWindow* splittermain = new wxSplitterWindow(this, wxID_ANY); // 分割作成
 	sizermain->Add(splittermain, 1,wxEXPAND, 0); // 分割をメインサイザへ追加
