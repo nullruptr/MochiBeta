@@ -1,6 +1,7 @@
 # Build (build + 何かの文字 のディレクトリを除外)
 /build*/
 
+
 # SQLite
 *.db
 
@@ -13,3 +14,10 @@
 # compile_commands
 compile_commands.json
 compile_commands.txt
+
+
+#.gitignore_hidden_message
+.gitignore_hidden_message
+
+#.cache
+/.cache/
