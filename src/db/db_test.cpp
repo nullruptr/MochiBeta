@@ -1,0 +1,68 @@
+#include <iostream>
+#include <string>
+#include "db/database.hpp"
+
+void init();
+void connect();
+
+int main(){
+	std::cout << "DB テスト" << std::endl;
+	std::cout << "実行するテストを選択してください" << std::endl;
+
+	int testcase;
+	std::cout << "1." << "DB初期化テスト" << std::endl;
+	std::cout << "2." << "DB接続テスト" << std::endl;
+	std::cin >> testcase;
+
+	switch (testcase) {
+		case 1:
+			std::cout << "データベース初期化テストを開始します。" << std::endl;
+			init();
+			break;
+		case 2:
+			std::cout << "DB接続テストを開始します。" << std::endl;
+			connect();
+			break;
+	}
+	return 0;
+}
+
+void init(){
+
+	Database db; // インスタンス作成
+	std::string db_path = "test_db.db";
+	
+	if(db.Connect(db_path)){
+		std::cout << "オープン成功" << std::endl;
+	} else {
+		std::cout << "オープン失敗" << std::endl;
+		std::cout << "新規作成します" << std::endl;
+
+		if (db.Create(db_path)){ // なかったら作る
+			std::cout << "作成成功" << std::endl;
+			std::cout << "ファイル名: " << db_path << std::endl;
+		} else {
+			std::cerr << "DB作成失敗" << std::endl;
+		}
+
+		// テーブル初期化のテスト
+		if (db.Initialize()) {
+			std::cout << "テーブルの初期化に成功しました。" << std::endl;
+		}
+	
+		db.Close(); // 閉じる
+	}
+
+}
+
+void connect(){
+	Database db; // インスタンス作成
+	std::string db_path = "test_db.db";
+	
+	if (db.Connect(db_path)) {
+		std::cout << "DB接続成功" << std::endl;
+	} else {
+		std::cout << "DB接続失敗" << std::endl;
+	}
+	db.Close(); // 閉じる
+}

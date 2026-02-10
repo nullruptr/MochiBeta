@@ -9,6 +9,7 @@ public:
 	bool Connect(const std::string& path);
 	bool Create(const std::string& path);
 	bool Initialize();
+	bool Insert();
 	void Close();
 
 private:
