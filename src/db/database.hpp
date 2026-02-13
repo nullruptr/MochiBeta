@@ -9,7 +9,8 @@ public:
 	bool Connect(const std::string& path);
 	bool Create(const std::string& path);
 	bool Initialize();
-	bool Insert();
+	bool InsertCategories(const std::string &name, int parent_id);
+	bool InsertRecords(const std::string &name, int parent_id);
 	void Close();
 
 private:

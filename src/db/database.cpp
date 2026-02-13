@@ -1,4 +1,4 @@
-#include "database.hpp"
+#include "db/database.hpp"
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
@@ -73,7 +73,86 @@ bool Database::Initialize(){
 	return true;	
 }
 
-bool Database::Insert(){
+
+// --- stmt についてのメモ ---
+//
+// stmt は sqlite3_stmt* 型，&stmt は sqlite3_stmt** 型
+// 関数側の仮引数を sqlite3_stmt** ppStmt とすると，呼び出し時に
+// ppStmt == &stmt ...(1)
+// となる．
+// (1)に両辺に * を付け加えると，
+// *ppStmt == *(&stmt)...(2)
+// となる．
+// ここで，&stmt は，stmt のアドレス，*(&stmt)は取得されたアドレスの中身を見るということから，
+// *(&stmt) == stmt
+// より，*(&stmt) は，stmt そのものとなる．
+//
+// 次に，temp をSQL構文を解析した結果を格納する構造体とする．
+// SQLite 内部で，
+// sqlite3_stmt* temp = malloc(...)
+// とし，構造体を格納するメモリを確保する．
+// temp には，確保されたメモリのアドレスが格納される．
+// ここで，(2)より，
+// *ppStmt == temp;
+// とすると，stmt はSQL構文解析結果が書かれた temp のアドレスとなる．
+//
+// 従って，sqlite3_prepare_v2 以降の stmt は，temp のアドレスそのものである．
+// 故に，stmt から temp のアドレスにアクセスすることができる．
+//
+// -------
+
+bool Database::InsertCategories(const std::string &name, int parent_id){
+	if (db == nullptr){ // DB が開いていなかったら，抜ける
+		return false;
+	}
+
+	// ? はプレースホルダ（後で値を流し込む場所）
+	// categories に VALUES (?, ?) を INSERT する定義文．
+	const char* sql = "INSERT INTO categories (name, parent_id) VALUES (?, ?);";
+
+	// "stmt" というポインタ変数をスタックに確保
+	sqlite3_stmt* stmt = nullptr;
+
+	// 1. SQL文の準備
+	// sqlite3_prepare_v2 の引数
+	// 	1. db 接続ハンドル
+	// 	2. SQL 文
+	// 	3. SQL 文字列バイト数．-1で終端nullまで
+	// 	4. sqlite3_stmt のアドレス
+	// 	5. 基本 nullptr．複数SQL連結時のみ使用
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+		std::cerr << "Prepare Error: " << sqlite3_errmsg(db) << std::endl; // sqlite3_prepare_v2 のときのエラー内容取得は，sqlite3_errmsg(db) らしい
+	return false;
+	}
+
+	// 2. 値のバインド（? の部分に実際の値を割り当てる）
+	// 
+	// sqlite3_bind_text の引数
+	// 	1. sqlite3_prepare_v2 で生成されたステートメント
+	// 	2. プレースホルダ番号．スタートは１から
+	// 	3. バインドする文字列
+	// 	4. 文字列長．-1で終端nullまで
+	// 	5. 文字列メモリの扱い方．安全のため，基本的に SQLITE_TRANSIENT(SQLite側でコピー作成)を使用
+	//
+	// 1番目の ? に name をセット
+	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_TRANSIENT);
+	// 2番目の ? に parent_id をセット
+	// sqlite3_bind_int の引数
+	// 	1. 2. は上記と同じ
+	// 	3. バインドする整数値
+	sqlite3_bind_int(stmt, 2, parent_id);
+
+	// 3. 実行
+	int rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) { 
+		std::cerr << "Execution Error: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(stmt);
+		return false;
+	}
+
+	// 4. 後片付け
+	sqlite3_finalize(stmt); // stmt 解法
+	std::cout << "Category '" << name << "' inserted successfully." << std::endl;
 	return true;
 }
 
@@ -81,7 +160,7 @@ bool Database::Insert(){
 
 void Database::Close() { // 閉じる
 	if (db != nullptr) {
-		sqlite3_close(db);
+		sqlite3_close_v2(db);
 		db = nullptr;
 	}
 }
