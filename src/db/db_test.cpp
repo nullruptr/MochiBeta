@@ -1,9 +1,12 @@
+// database の接続テストです．CLI 専用です．wxWidgets 側では使いません．
 #include <iostream>
 #include <string>
 #include "db/database.hpp"
 
 void init();
 void connect();
+void inscat();
+void insrec();
 
 int main(){
 	std::cout << "DB テスト" << std::endl;
@@ -12,17 +15,28 @@ int main(){
 	int testcase;
 	std::cout << "1." << "DB初期化テスト" << std::endl;
 	std::cout << "2." << "DB接続テスト" << std::endl;
+	std::cout << "3." << "カテゴリ登録テスト" << std::endl;
+	std::cout << "4." << "レコードテスト" << std::endl;
 	std::cin >> testcase;
 
 	switch (testcase) {
 		case 1:
-			std::cout << "データベース初期化テストを開始します。" << std::endl;
+			std::cout << "DB 初期化テストを開始します。" << std::endl;
 			init();
 			break;
 		case 2:
-			std::cout << "DB接続テストを開始します。" << std::endl;
+			std::cout << "DB 接続テストを開始します。" << std::endl;
 			connect();
 			break;
+		case 3:
+			std::cout << "カテゴリ登録テストを開始します．" << std::endl;
+			inscat();
+			break;
+		case 4:
+			std::cout << "レコードテストを開始します．" << std::endl;
+			insrec();
+			break;
+
 	}
 	return 0;
 }
@@ -65,4 +79,26 @@ void connect(){
 		std::cout << "DB接続失敗" << std::endl;
 	}
 	db.Close(); // 閉じる
+}
+
+
+void inscat(){
+	Database db;
+	std::string db_path = "test_db.db";
+
+	std::string name;
+	int parent_id;
+
+	std::cout << "カテゴリ名称: ";
+	std::cin >> name;
+	std::cout << std::endl;
+
+	std::cout << "親のID: ";
+	std::cin >> parent_id;
+
+
+}
+void insrec(){
+	Database db;
+	std::string db_path = "test_db.db";
 }

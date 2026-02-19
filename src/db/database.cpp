@@ -11,7 +11,7 @@ Database::~Database(){ // 終了時処理。安全のため、デストラクタ
 	Close();
 }
 
-bool Database::Connect(const std::string& path) { // DB を開く
+bool Database::Connect(const std::string& path) { // DB に接続 
 	int rc = sqlite3_open_v2(
 			path.c_str(),
 			&db,
@@ -156,6 +156,36 @@ bool Database::InsertCategories(const std::string &name, int parent_id){
 	return true;
 }
 
+bool Database::InsertRecords(int category_id, const std::string &time_begin, const std::string &time_end){
+	if (db == nullptr){ 
+		return false;
+	}
+
+	const char* sql = "INSERT INTO records (category_id, time_begin, time_end) VALUES (?, ?, ?);";
+
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
+		std::cerr << "Prepare Error: " << sqlite3_errmsg(db) << std::endl; 
+		return false;
+	}
+
+
+	sqlite3_bind_int(stmt, 1, category_id);
+	sqlite3_bind_text(stmt, 2, time_begin.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 3, time_end.c_str(), -1, SQLITE_TRANSIENT);
+
+	// 実行
+	int rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) { 
+		std::cerr << "Execution Error: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(stmt);
+		return false;
+	}
+
+	sqlite3_finalize(stmt); // stmt 解法
+	return true;
+}
 
 
 void Database::Close() { // 閉じる
