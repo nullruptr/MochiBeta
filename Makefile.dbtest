@@ -1,0 +1,4 @@
+# データベーステスト用コンソール
+# make -f Makefile.dbtest dbtest
+dbtest:
+	g++ -I./src -o db_test src/db/db_test.cpp src/db/database.cpp -lsqlite3

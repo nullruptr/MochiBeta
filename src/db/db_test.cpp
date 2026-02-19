@@ -1,15 +1,21 @@
 // database の接続テストです．CLI 専用です．wxWidgets 側では使いません．
+#include <filesystem>
 #include <iostream>
+#include <regex>
 #include <string>
 #include "db/database.hpp"
 
-void init();
-void connect();
-void inscat();
-void insrec();
+void init(const std::string& path);
+void connect(const std::string& path);
+void inscat(const std::string& path);
+void insrec(const std::string& path);
 
 int main(){
+	std::string path;
 	std::cout << "DB テスト" << std::endl;
+	std::cout << "DB のパスを入力してください。" << std::endl;
+	std::cin >> path;
+	
 	std::cout << "実行するテストを選択してください" << std::endl;
 
 	int testcase;
@@ -22,39 +28,38 @@ int main(){
 	switch (testcase) {
 		case 1:
 			std::cout << "DB 初期化テストを開始します。" << std::endl;
-			init();
+			init(path);
 			break;
 		case 2:
 			std::cout << "DB 接続テストを開始します。" << std::endl;
-			connect();
+			connect(path);
 			break;
 		case 3:
 			std::cout << "カテゴリ登録テストを開始します．" << std::endl;
-			inscat();
+			inscat(path);
 			break;
 		case 4:
 			std::cout << "レコードテストを開始します．" << std::endl;
-			insrec();
+			insrec(path);
 			break;
 
 	}
 	return 0;
 }
 
-void init(){
+void init(const std::string& path){
 
 	Database db; // インスタンス作成
-	std::string db_path = "test_db.db";
 	
-	if(db.Connect(db_path)){
+	if(db.Connect(path)){
 		std::cout << "オープン成功" << std::endl;
 	} else {
 		std::cout << "オープン失敗" << std::endl;
 		std::cout << "新規作成します" << std::endl;
 
-		if (db.Create(db_path)){ // なかったら作る
+		if (db.Create(path)){ // なかったら作る
 			std::cout << "作成成功" << std::endl;
-			std::cout << "ファイル名: " << db_path << std::endl;
+			std::cout << "ファイル名: " << path << std::endl;
 		} else {
 			std::cerr << "DB作成失敗" << std::endl;
 		}
@@ -69,11 +74,10 @@ void init(){
 
 }
 
-void connect(){
+void connect(const std::string& path){
 	Database db; // インスタンス作成
-	std::string db_path = "test_db.db";
 	
-	if (db.Connect(db_path)) {
+	if (db.Connect(path)) {
 		std::cout << "DB接続成功" << std::endl;
 	} else {
 		std::cout << "DB接続失敗" << std::endl;
@@ -82,23 +86,31 @@ void connect(){
 }
 
 
-void inscat(){
+void inscat(const std::string& path){
 	Database db;
-	std::string db_path = "test_db.db";
+	if (!db.Connect(path)){ // 接続
+		std::cout << "DB接続失敗" << std::endl;
+	}
 
 	std::string name;
 	int parent_id;
 
 	std::cout << "カテゴリ名称: ";
 	std::cin >> name;
-	std::cout << std::endl;
 
-	std::cout << "親のID: ";
+	std::cout << "親のID(なければ0): ";
 	std::cin >> parent_id;
 
+	if (db.InsertCategories(name, parent_id)){
+		std::cout << "登録成功" << std::endl;
+	} else {
+		std::cout << "登録失敗" << std::endl;
+	}
+
+	db.Close();
 
 }
-void insrec(){
+
+void insrec(const std::string& path){
 	Database db;
-	std::string db_path = "test_db.db";
 }

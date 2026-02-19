@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
+#include <vector>
 
 Database::Database() : db(nullptr) {
 	
@@ -12,6 +13,7 @@ Database::~Database(){ // 終了時処理。安全のため、デストラクタ
 }
 
 bool Database::Connect(const std::string& path) { // DB に接続 
+	this->path = path; // 何故いる？
 	int rc = sqlite3_open_v2(
 			path.c_str(),
 			&db,
@@ -44,6 +46,10 @@ bool Database::Create(const std::string& path) { // DB 新規作成
 
 bool Database::Initialize(){
 	std::cout << "Starting Initialize..." << std::endl;
+
+	if (db == nullptr){ // DB が開いていなかったら，抜ける
+		return false;
+	}
 
 	const char* sql =
 		"CREATE TABLE IF NOT EXISTS categories ("// 同名のテーブルが存在しない場合のみ新しいテーブルを作成し、既存の場合はエラーを出さずに処理をスキップ（無視）する
@@ -186,6 +192,7 @@ bool Database::InsertRecords(int category_id, const std::string &time_begin, con
 	sqlite3_finalize(stmt); // stmt 解法
 	return true;
 }
+
 
 
 void Database::Close() { // 閉じる

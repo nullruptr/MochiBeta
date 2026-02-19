@@ -21,3 +21,6 @@ compile_commands.txt
 
 #.cache
 /.cache/
+
+# db test file
+db_test
