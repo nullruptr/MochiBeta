@@ -2,7 +2,7 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
-#include "record/record_window.hpp"
+#include "gui/record/record_window.hpp"
 
 enum{
 	ID_TREE_EDIT

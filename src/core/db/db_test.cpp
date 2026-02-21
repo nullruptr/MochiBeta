@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
-#include "db/database.hpp"
+#include "core/db/database.hpp"
 
 void init(const std::string& path);
 void connect(const std::string& path);
