@@ -1,13 +1,14 @@
 // database の接続テストです．CLI 専用です．wxWidgets 側では使いません．
-#include <filesystem>
+#include <cstdio>
 #include <iostream>
-#include <regex>
 #include <string>
+#include <chrono>
 #include "db/database.hpp"
 
 void init(const std::string& path);
 void connect(const std::string& path);
 void inscat(const std::string& path);
+void insrec(const std::string& path);
 void insrec(const std::string& path);
 
 int main(){
@@ -90,6 +91,7 @@ void inscat(const std::string& path){
 	Database db;
 	if (!db.Connect(path)){ // 接続
 		std::cout << "DB接続失敗" << std::endl;
+		return;
 	}
 
 	std::string name;
@@ -111,6 +113,31 @@ void inscat(const std::string& path){
 
 }
 
+
 void insrec(const std::string& path){
 	Database db;
+	if (!db.Connect(path)){ // 接続
+		std::cout << "DB接続失敗" << std::endl;
+		return;
+	}
+
+	int category_id;
+	std::string time_begin;
+	std::string time_end;
+
+	std::cout << "カテゴリID: ";
+	std::cin >> category_id;
+
+	std::cout << "開始時刻: ";
+	
+	getchar();
+
+	std::cout << "終了時刻: ";
+	if (db.InsertRecords(category_id, time_begin, time_end)){
+		std::cout << "登録成功" << std::endl;
+	} else {
+		std::cout << "登録失敗" << std::endl;
+	}
+
+	db.Close();
 }
