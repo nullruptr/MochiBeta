@@ -1,9 +1,11 @@
 // database の接続テストです．CLI 専用です．wxWidgets 側では使いません．
 #include <cstdio>
+#include <ios>
 #include <iostream>
 #include <string>
-#include <chrono>
+#include <limits>
 #include "core/db/database.hpp"
+#include "core/clock/clock.hpp"
 
 void init(const std::string& path);
 void connect(const std::string& path);
@@ -116,6 +118,7 @@ void inscat(const std::string& path){
 
 void insrec(const std::string& path){
 	Database db;
+	Clock cl;
 	if (!db.Connect(path)){ // 接続
 		std::cout << "DB接続失敗" << std::endl;
 		return;
@@ -127,12 +130,22 @@ void insrec(const std::string& path){
 
 	std::cout << "カテゴリID: ";
 	std::cin >> category_id;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // category_id の改行破棄 (std::cin.get()と干渉するため)
 
-	std::cout << "開始時刻: ";
+	std::cout << "Enter で開始: ";
+	std::cin.get();
+	time_begin = cl.now_utc_iso8601();
 	
-	getchar();
 
-	std::cout << "終了時刻: ";
+	std::cout << "Enter で終了: ";
+	std::cin.get();
+	time_end = cl.now_utc_iso8601();
+
+	if (time_end < time_begin) {
+		std::cerr << "時刻逆転エラー" << std::endl;
+		return;
+	}
+
 	if (db.InsertRecords(category_id, time_begin, time_end)){
 		std::cout << "登録成功" << std::endl;
 	} else {
