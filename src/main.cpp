@@ -1,11 +1,12 @@
+#include <wx/msgdlg.h>
 #include <wx/wx.h>
 #include "main.hpp"
+#include "core/db/database.hpp"
 #include "gui/time_log/time_log.hpp"
-#include "wx/language.h"
-#include <wx/intl.h>
+#include "gui/connect_db/connect_db.hpp"
 
 enum {
-	ID_FILE_OPEN, //DBファイル
+	ID_CONNECT_DB, //DBファイル
 	ID_SETTINGS, //設定ウィンドウ
 	ID_TIME_LOG, //時間記録画面
 };
@@ -18,6 +19,8 @@ public:
 	void OnTimer(wxTimerEvent &event); // 時間表示をリアルタイムで行うために必要
 	void OnQuit(wxCommandEvent &event); // 終了インベント処理
 	void OnTimeLog(wxCommandEvent &event); // 時間記録画面を開く
+	void OnConnectDB(wxCommandEvent &event);
+	Database db;
 private:
 	wxTimer timer;
 	wxStaticText *sys_c;
@@ -70,7 +73,7 @@ MBFrame::MBFrame(const wxString& title) :
 
 		// メニュー内容の設定
 		wxMenu* menuFile = new wxMenu;
-		menuFile->Append(ID_FILE_OPEN, _("Open DB (Not implemented)"));
+		menuFile->Append(ID_CONNECT_DB, _("Connect DB (Not implemented)"));
 		menuFile->Append(ID_SETTINGS, _("Settings (Not implemented)"));
 		menuFile->AppendSeparator();
 		menuFile->Append(wxID_EXIT, _("Quit\t F12"));
@@ -92,6 +95,7 @@ MBFrame::MBFrame(const wxString& title) :
 		menuBar->Append(menuManagement, _("Management"));
 		SetMenuBar(menuBar);
 
+		Bind(wxEVT_MENU, &MBFrame::OnConnectDB, this, ID_CONNECT_DB); // 接続用ウィンドウ
 		Bind(wxEVT_MENU, &MBFrame::OnQuit, this, wxID_EXIT); // 終了ボタン -> 終了イベント
 		Bind(wxEVT_MENU, &MBFrame::OnTimeLog, this, ID_TIME_LOG);
 
@@ -150,6 +154,22 @@ void MBFrame::OnQuit(wxCommandEvent& WXUNUSED(event)){ // 終了確認
 void MBFrame::OnTimeLog(wxCommandEvent& event){
 	TimeLog* log = new TimeLog(this);
 	log->Show(true);
+}
+
+void MBFrame::OnConnectDB(wxCommandEvent& event){
+	ConnectDB dlg(this); // 新規ダイアログ作成
+
+	if (dlg.ShowModal() == wxID_OK){ // モーダル表示。ファイル確認完了後、接続処理へ。
+		std::string path = dlg.GetPath().ToStdString();
+
+		if (db.Connect(path)){
+			wxMessageBox(_("Connected"));
+		} else {
+			wxMessageBox(_("Connection failed"));
+		}
+
+	}
+
 }
 
 
