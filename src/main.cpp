@@ -21,6 +21,7 @@ public:
 	void OnTimeLog(wxCommandEvent &event); // 時間記録画面を開く
 	void OnConnectDB(wxCommandEvent &event);
 	Database db;
+	wxString current_DB_Path;
 private:
 	wxTimer timer;
 	wxStaticText *sys_c;
@@ -99,6 +100,13 @@ MBFrame::MBFrame(const wxString& title) :
 		Bind(wxEVT_MENU, &MBFrame::OnQuit, this, wxID_EXIT); // 終了ボタン -> 終了イベント
 		Bind(wxEVT_MENU, &MBFrame::OnTimeLog, this, ID_TIME_LOG);
 
+
+		// ステータスバーの設定
+		CreateStatusBar(2);
+		// 初期表示
+		SetStatusText(_("Disconnected"), 0);
+		SetStatusText("", 1);
+
 		// F12 で終了処理
 		wxAcceleratorEntry entry;
 		entry.Set(wxACCEL_NORMAL, WXK_F12, wxID_EXIT);
@@ -164,6 +172,10 @@ void MBFrame::OnConnectDB(wxCommandEvent& event){
 
 		if (db.Connect(path)){
 			wxMessageBox(_("Connected"));
+			// ステータスバーに設定
+			current_DB_Path = dlg.GetPath();
+			SetStatusText(_("Connected"), 0);
+			SetStatusText(current_DB_Path, 1);
 		} else {
 			wxMessageBox(_("Connection failed"));
 		}
