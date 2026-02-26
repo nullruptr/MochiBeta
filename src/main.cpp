@@ -74,7 +74,7 @@ MBFrame::MBFrame(const wxString& title) :
 
 		// メニュー内容の設定
 		wxMenu* menuFile = new wxMenu;
-		menuFile->Append(ID_CONNECT_DB, _("Connect DB (Not implemented)"));
+		menuFile->Append(ID_CONNECT_DB, _("Connect DB"));
 		menuFile->Append(ID_SETTINGS, _("Settings (Not implemented)"));
 		menuFile->AppendSeparator();
 		menuFile->Append(wxID_EXIT, _("Quit\t F12"));
