@@ -2,7 +2,6 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
-#include <vector>
 
 Database::Database() : db(nullptr) {
 	
@@ -13,7 +12,6 @@ Database::~Database(){ // 終了時処理。安全のため、デストラクタ
 }
 
 bool Database::Connect(const std::string& path) { // DB に接続 
-	this->path = path; // 何故いる？
 	int rc = sqlite3_open_v2(
 			path.c_str(),
 			&db,
