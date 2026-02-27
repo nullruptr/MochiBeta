@@ -2,14 +2,18 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
+#include "gui/connect_db/connect_db.hpp"
 #include "gui/record/record_window.hpp"
 
 enum{
-	ID_TREE_EDIT
+	ID_TREE_EDIT,
+	ID_CREATE
 };
 
 TimeLog::TimeLog(wxWindow* parent)
 	:wxFrame(parent, wxID_ANY, wxT("TimeLog Window"), wxDefaultPosition, wxSize())
+	, cdb(this)
+	
 {
 	wxFont font(
 		13,
@@ -41,16 +45,7 @@ TimeLog::TimeLog(wxWindow* parent)
 
 	tree->SetFont(font);
 
-	wxTreeItemId root = tree->AddRoot(wxT("業務"));
-
-	wxTreeItemId cat1 = tree->AppendItem(root, wxT("開発"));
-	tree->AppendItem(cat1, wxT("設計"));
-	tree->AppendItem(cat1, wxT("実装"));
-	tree->AppendItem(cat1, wxT("レビュー"));
-
-	wxTreeItemId cat2 = tree->AppendItem(root, wxT("会議"));
-	tree->AppendItem(cat2, wxT("定例"));
-	tree->AppendItem(cat2, wxT("打合せ"));
+	wxTreeItemId root = tree->AddRoot("root");
 
 	tree->ExpandAll();
 
@@ -83,10 +78,24 @@ TimeLog::TimeLog(wxWindow* parent)
 	category_st->SetForegroundColour(*wxWHITE);
 	category_st->SetBackgroundColour(wxColour(0, 51, 153));
 	categorybox->Add(category_st, 1, wxRIGHT | wxEXPAND, 8);
+
+	m_categoryText = new wxTextCtrl(
+			pnl_time_log,
+			wxID_ANY,
+			wxEmptyString,
+			wxDefaultPosition,
+			wxSize(250, -1),
+			wxTE_PROCESS_ENTER
+			);
+
+	m_categoryText->Bind(wxEVT_TEXT_ENTER, [](wxCommandEvent &event){
+		// Enter で子ノードが永遠と追加されるため、フックして何もしないようにする。
+	});
+
+	categorybox->Add(m_categoryText, 0, wxALIGN_CENTER_VERTICAL, 8);
+
 	timelog_sizer->Add(categorybox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 10);
 
-	wxButton* btn1 = new wxButton(pnl_time_log, wxID_ANY, wxT("ボタン1"));
-	timelog_sizer->Add(btn1, 0, wxEXPAND | wxALL, 5);
 
 	timelog_sizer->AddStretchSpacer(); // 中央に余白を追加
 
@@ -94,18 +103,24 @@ TimeLog::TimeLog(wxWindow* parent)
 	wxBoxSizer* bottomSizer = new wxBoxSizer(wxHORIZONTAL); // 下部ボタン用サイザ
 	
 
-	wxButton* btn_record = new wxButton(
+	btn_record = new wxButton(
 			pnl_time_log,
 			wxID_ANY,
 			wxT("記録開始")
 			);
-	wxButton* btn_end = new wxButton(
+	btn_save = new wxButton(
+			pnl_time_log,
+			wxID_ANY,
+			_("Save")
+			);
+	btn_end = new wxButton(
 			pnl_time_log,
 			wxID_EXIT,
 			wxT("終了(F12)")
 			);
-	bottomSizer->Add(btn_record, 0, wxLEFT | wxBOTTOM, 10); // レコードボタンをサイザへ登録
 	bottomSizer->AddStretchSpacer(); // 下部に余白を追加
+	bottomSizer->Add(btn_record, 0, wxRIGHT | wxBOTTOM, 10); // レコードボタンをサイザへ登録
+	bottomSizer->Add(btn_save, 0, wxRIGHT | wxBOTTOM, 10);
 	bottomSizer->Add(btn_end, 0, wxRIGHT | wxBOTTOM, 10); // 終了ボタンをサイザへ登録
 	
 	timelog_sizer->Add(bottomSizer, 0, wxEXPAND); // 下部サイザを時間記録用サイザへ登録
@@ -114,6 +129,8 @@ TimeLog::TimeLog(wxWindow* parent)
 	
 	// 記録開始ボタンのBind
 	btn_record->Bind(wxEVT_BUTTON, &TimeLog::OnRecordStart, this); // 記録開始ボタン -> レコード開始ボタン遷移
+	
+	btn_save->Bind(wxEVT_BUTTON, &TimeLog::OnSaveCategory, this); // DB セーブ用
 
 	// F12 でウィンドウを閉じる
 	wxAcceleratorEntry entry;
@@ -153,9 +170,17 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 	// 右クリックメニューの作成
 	wxMenu menu;
 
+	menu.Append(ID_CREATE, _("Create New Category"));
 	menu.Append(wxID_EDIT, _("Edit"));
+	menu.Append(wxID_ANY, _("Delete"));
 
 
+	Bind(
+		wxEVT_MENU,
+		&TimeLog::OnCreateNewCategory,
+		this,
+		ID_CREATE	
+	);
 	//wxID_MENUのメニューにおいて、wxID_EDITが呼ばれたら、TimeLog::OnEditItemを呼び出すよう指示。
 	//
 	Bind(
@@ -169,6 +194,32 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 	PopupMenu(&menu);
 	
 
+}
+
+void TimeLog::OnCreateNewCategory(wxCommandEvent &event){
+	// 現在選択されているアイテムを取得
+	wxTreeItemId parent = m_tree->GetSelection();
+
+	// 無効な場合は処理しない
+	if (!parent.IsOk()){
+		return;
+	}
+
+	// 新規ノード名
+	wxString newCategoryName = wxT("New Category");
+
+	// 子ノードを追加
+	wxTreeItemId newItem = m_tree->AppendItem(parent, newCategoryName);
+
+	// 親を展開
+	m_tree->ExpandAll();
+
+	// 追加したノードを選択状態にする
+	m_tree->SelectItem(newItem);
+
+	// TreeCtrl へ反映
+	m_categoryText->SetValue(newCategoryName);
+	m_categoryText->SetFocus();
 }
 
 void TimeLog::OnEditItem(wxCommandEvent& event){
@@ -191,9 +242,6 @@ void TimeLog::OnEditItem(wxCommandEvent& event){
 	);
 }
 
-void TimeLog::OnCategoryDetail(wxCommandEvent& event){
-	
-}
 
 void TimeLog::OnRecordStart(wxCommandEvent& event){ // レコード開始ウィンドウ遷移処理
 	
@@ -214,6 +262,46 @@ void TimeLog::OnRecordStart(wxCommandEvent& event){ // レコード開始ウィ�
 	
 	rec_wnd->Show(); // 生成したものを表示
 
+}
+
+void TimeLog::OnSetTreeCtrlItem(wxCommandEvent& event){
+	wxString current_DB_Path = cdb.GetPath();
+}
+
+void TimeLog::OnSaveCategory(wxCommandEvent &event){
+	wxTreeItemId item = m_tree->GetSelection();
+
+	if(!item.IsOk()){
+		return;
+	}
+
+	wxString categoryName = m_categoryText->GetValue(); // TextCtrlから名前を取得
+	std::string categoryName_std = categoryName.ToStdString(); // wxString を、std::string へ変換
+	if (categoryName.IsEmpty()) { // 空判定
+		wxMessageBox(
+			_("Name is empty"),
+			"Error",
+			wxOK | wxICON_WARNING,
+			this);
+		return;
+	}
+
+	// --- DB 保存処理 ---
+
+	bool result = db.InsertCategories(categoryName_std, 1);
+
+	if (!result){ // エラー処理
+		wxMessageBox(
+				_("Unable to save parameter"),
+				"DB Error",
+				wxOK | wxICON_ERROR,
+				this
+			    );
+		return;
+	}
+
+	// 更新処理
+	m_tree->SetItemText(item, categoryName);
 }
 
 
