@@ -1,13 +1,14 @@
 #pragma once
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
+#include <wx/string.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
 class TimeLog : public wxFrame{
 
 public:
-	TimeLog(wxWindow* parent);
+	TimeLog(wxWindow* parent, const wxString& dbPath);
 	void OnCreateNewCategory(wxCommandEvent& event);
 	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
@@ -26,6 +27,7 @@ private:
 	void OnTreeRightClick(wxTreeEvent& event);
 	// 編集メニューの設定
 	void OnEditItem(wxCommandEvent& event);
+	wxString m_dbPath;
 	ConnectDB cdb;
 	Database db;
 };

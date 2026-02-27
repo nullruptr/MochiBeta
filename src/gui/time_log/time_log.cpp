@@ -10,11 +10,12 @@ enum{
 	ID_CREATE
 };
 
-TimeLog::TimeLog(wxWindow* parent)
+TimeLog::TimeLog(wxWindow* parent, const wxString& dbPath)
 	:wxFrame(parent, wxID_ANY, wxT("TimeLog Window"), wxDefaultPosition, wxSize())
 	, cdb(this)
 	
 {
+	m_dbPath = dbPath;
 	wxFont font(
 		13,
 		wxFONTFAMILY_DEFAULT,
@@ -72,12 +73,25 @@ TimeLog::TimeLog(wxWindow* parent)
 
 	wxBoxSizer *timelog_sizer = new wxBoxSizer(wxVERTICAL); // サイザ
 
-	wxBoxSizer *categorybox = new wxBoxSizer(wxHORIZONTAL);
+	// パス表示用エリア
+	
+	wxBoxSizer* pathBox = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText* path_st = new wxStaticText(pnl_time_log, wxID_ANY, _("DB Path: ") + m_dbPath); // パス表示
+	path_st->SetFont(font);
+	path_st->SetForegroundColour(*wxWHITE);
+	path_st->SetBackgroundColour(wxColour(0, 51, 153));
+
+	pathBox->Add(path_st, 0, wxRIGHT | wxEXPAND, 8);
+	
+	// カテゴリ表示用エリア
 	wxStaticText* category_st = new wxStaticText(pnl_time_log, wxID_ANY, wxT("区分: ")); // カテゴリ StaticText
+
+	wxBoxSizer *categorybox = new wxBoxSizer(wxHORIZONTAL);
 	category_st->SetFont(font);
 	category_st->SetForegroundColour(*wxWHITE);
 	category_st->SetBackgroundColour(wxColour(0, 51, 153));
-	categorybox->Add(category_st, 1, wxRIGHT | wxEXPAND, 8);
+
+	categorybox->Add(category_st, 0, wxRIGHT | wxEXPAND, 8);
 
 	m_categoryText = new wxTextCtrl(
 			pnl_time_log,
@@ -94,7 +108,8 @@ TimeLog::TimeLog(wxWindow* parent)
 
 	categorybox->Add(m_categoryText, 0, wxALIGN_CENTER_VERTICAL, 8);
 
-	timelog_sizer->Add(categorybox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 10);
+	timelog_sizer->Add(pathBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
+	timelog_sizer->Add(categorybox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
 
 
 	timelog_sizer->AddStretchSpacer(); // 中央に余白を追加
@@ -275,9 +290,9 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 		return;
 	}
 
-	wxString categoryName = m_categoryText->GetValue(); // TextCtrlから名前を取得
-	std::string categoryName_std = categoryName.ToStdString(); // wxString を、std::string へ変換
-	if (categoryName.IsEmpty()) { // 空判定
+
+	std::string m_dbPath_std = m_dbPath.ToStdString(); // wxString を、std::string へ変換
+	if (m_dbPath.IsEmpty()) { // 空判定
 		wxMessageBox(
 			_("Name is empty"),
 			"Error",
@@ -288,7 +303,7 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 
 	// --- DB 保存処理 ---
 
-	bool result = db.InsertCategories(categoryName_std, 1);
+	bool result = db.InsertCategories(m_dbPath_std, 1);
 
 	if (!result){ // エラー処理
 		wxMessageBox(
@@ -301,7 +316,7 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 	}
 
 	// 更新処理
-	m_tree->SetItemText(item, categoryName);
+	m_tree->SetItemText(item, m_dbPath);
 }
 
 

@@ -160,7 +160,17 @@ void MBFrame::OnQuit(wxCommandEvent& WXUNUSED(event)){ // 終了確認
 }
 
 void MBFrame::OnTimeLog(wxCommandEvent& event){
-	TimeLog* log = new TimeLog(this);
+	// DB 接続判定
+	if (current_DB_Path.IsEmpty()){
+		wxMessageBox(
+				_("Unable to connect database"),
+				"DB Error",
+				wxOK | wxICON_ERROR,
+				this
+			    );
+		return;
+	}
+	TimeLog* log = new TimeLog(this, current_DB_Path);
 	log->Show(true);
 }
 
