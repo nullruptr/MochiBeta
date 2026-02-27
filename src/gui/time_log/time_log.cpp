@@ -2,6 +2,7 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
+#include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/record/record_window.hpp"
 
@@ -10,9 +11,10 @@ enum{
 	ID_CREATE
 };
 
-TimeLog::TimeLog(wxWindow* parent, const wxString& dbPath)
+TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	:wxFrame(parent, wxID_ANY, wxT("TimeLog Window"), wxDefaultPosition, wxSize())
 	, cdb(this)
+	, db(dbRef)
 	
 {
 	m_dbPath = dbPath;
@@ -290,20 +292,22 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 		return;
 	}
 
+	wxString categoryName = m_categoryText->GetValue();
 
-	std::string m_dbPath_std = m_dbPath.ToStdString(); // wxString を、std::string へ変換
 	if (m_dbPath.IsEmpty()) { // 空判定
 		wxMessageBox(
-			_("Name is empty"),
+			_("Category name is empty"),
 			"Error",
 			wxOK | wxICON_WARNING,
 			this);
 		return;
 	}
 
+	std::string nameStd = categoryName.ToStdString(); // wxString を、std::string へ変換
+
 	// --- DB 保存処理 ---
 
-	bool result = db.InsertCategories(m_dbPath_std, 1);
+	bool result = db.InsertCategories(nameStd, 1);
 
 	if (!result){ // エラー処理
 		wxMessageBox(
@@ -316,7 +320,7 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 	}
 
 	// 更新処理
-	m_tree->SetItemText(item, m_dbPath);
+	m_tree->SetItemText(item, categoryName);
 }
 
 

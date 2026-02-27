@@ -170,7 +170,7 @@ void MBFrame::OnTimeLog(wxCommandEvent& event){
 			    );
 		return;
 	}
-	TimeLog* log = new TimeLog(this, current_DB_Path);
+	TimeLog* log = new TimeLog(this, db, current_DB_Path);
 	log->Show(true);
 }
 

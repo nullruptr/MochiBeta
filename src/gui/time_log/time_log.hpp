@@ -8,7 +8,7 @@
 class TimeLog : public wxFrame{
 
 public:
-	TimeLog(wxWindow* parent, const wxString& dbPath);
+	TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath);
 	void OnCreateNewCategory(wxCommandEvent& event);
 	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
