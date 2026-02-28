@@ -89,7 +89,7 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	pathBox->Add(path_st, 0, wxRIGHT | wxEXPAND, 8);
 	
 	// カテゴリ表示用エリア
-	wxStaticText* category_st = new wxStaticText(pnl_time_log, wxID_ANY, wxT("区分: ")); // カテゴリ StaticText
+	wxStaticText* category_st = new wxStaticText(pnl_time_log, wxID_ANY, _("Category Name: ")); // カテゴリ StaticText
 
 	wxBoxSizer *categorybox = new wxBoxSizer(wxHORIZONTAL);
 	category_st->SetFont(font);
@@ -226,6 +226,10 @@ void TimeLog::OnCreateNewCategory(wxCommandEvent &event){
 		return;
 	}
 
+	// 新規作成モードに変更
+	m_isCreatingNew = true;
+	m_newCategoryParent = parent; // 親ノード記録
+
 	// 新規ノード名
 	wxString newCategoryName = wxT("New Category");
 
@@ -290,24 +294,34 @@ void TimeLog::OnSetTreeCtrlItem(wxCommandEvent& event){
 }
 
 void TimeLog::OnSaveCategory(wxCommandEvent &event){
-	wxTreeItemId item = m_tree->GetSelection();
 
-	if(!item.IsOk()){
-		return;
+	// 新規作成モード出なければ何もしない
+	if (!m_isCreatingNew){
+		wxMessageBox(
+			_("Please use 'Create New Category' before saving."),
+			"Info",
+			wxOK | wxICON_INFORMATION,
+			this
+		    );
+        return;
 	}
+	wxTreeItemId item = m_tree->GetSelection();
 
 	// 親ノード取得
 	wxTreeItemId parent = m_tree->GetItemParent(item);
 
-	int parent_id = 0;
-
+	int parent_db_id = 0;
 	if (parent.IsOk()){
-	// 未実装
+		TreeItemData* parentData = (TreeItemData*)m_tree->GetItemData(parent);
+		if (parentData) { // データがあるとき(nullptr出ないとき)
+			parent_db_id = parentData->GetId();
+		}
+		// parentData が nullptr (rootノード)なら、parent_db_id = 0 のまま
 	}
-
 	wxString categoryName = m_categoryText->GetValue();
+	std::string nameStd = categoryName.ToStdString(); // wxString を、std::string へ変換
 
-	if (m_dbPath.IsEmpty()) { // 空判定
+	if (categoryName.IsEmpty()) { // 空判定
 		wxMessageBox(
 			_("Category name is empty"),
 			"Error",
@@ -316,13 +330,16 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 		return;
 	}
 
-	std::string nameStd = categoryName.ToStdString(); // wxString を、std::string へ変換
 
 	// --- DB 保存処理 ---
 
-	bool result = db.InsertCategories(nameStd, 0);
+	bool result = db.InsertCategories(nameStd, parent_db_id);
 
-	if (!result){ // エラー処理
+	if (result) { // 保存に成功したら、
+		m_isCreatingNew = false; // 新規作成モード解除
+		m_categoryText->Clear(); // 親ノード解放
+		LoadCategories(); // ツリー再読み込み
+	} else {
 		wxMessageBox(
 				_("Unable to save parameter"),
 				"DB Error",
@@ -331,9 +348,6 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 			    );
 		return;
 	}
-
-	// 更新処理
-	m_tree->SetItemText(item, categoryName);
 }
 
 void TimeLog::LoadCategories(){
@@ -359,7 +373,7 @@ void TimeLog::BuildTree(
 		) {
 	for (const auto& c : categories){ // カテゴリ数だけループ
 		if (c.parent_id == parentId){ // DB のparent_id と 引数の数値が同値の時
-			wxTreeItemId node = m_tree->AppendItem(parentNode, c.name); // 親の場所に子の名前でツリー登録
+			wxTreeItemId node = m_tree->AppendItem(parentNode, c.name, -1, -1, new TreeItemData(c.id)); // 親の場所に子の名前でツリー登録。同時にID(c.id) をデータとして紐付け。
 			BuildTree(c.id, node, categories); // 再起処理。自分のIDとノードを渡して、カテゴリ全件も渡す。子が存在したらぶら下げる。
 		}
 	}

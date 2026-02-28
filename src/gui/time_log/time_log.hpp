@@ -37,4 +37,7 @@ private:
 	wxString m_dbPath;
 	ConnectDB cdb;
 	Database& db;
+
+	bool m_isCreatingNew = false; // 新規作成中モードか否か
+	wxTreeItemId m_newCategoryParent; // 新規作成中の親ノード
 };
