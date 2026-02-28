@@ -2,6 +2,7 @@
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
 #include <wx/string.h>
+#include <wx/treebase.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
@@ -13,6 +14,12 @@ public:
 	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
 	void OnSaveCategory(wxCommandEvent &event);
+	void LoadCategories();
+	void BuildTree(
+			int parentId,
+			wxTreeItemId parentNode,
+			const std::vector<Database::Category> &categories
+		      );
 	void OnQuit(wxCommandEvent &event); // 終了インベント処理
 
 private:
@@ -29,5 +36,5 @@ private:
 	void OnEditItem(wxCommandEvent& event);
 	wxString m_dbPath;
 	ConnectDB cdb;
-	Database db;
+	Database& db;
 };

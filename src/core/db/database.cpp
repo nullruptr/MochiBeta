@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
+#include <vector>
 
 Database::Database() : db(nullptr) {
 	
@@ -12,6 +13,11 @@ Database::~Database(){ // 終了時処理。安全のため、デストラクタ
 }
 
 bool Database::Connect(const std::string& path) { // DB に接続 
+	// すでに接続されているときは、閉じる
+	if (db != nullptr){
+		Close();
+	}
+
 	int rc = sqlite3_open_v2(
 			path.c_str(),
 			&db,
@@ -188,6 +194,32 @@ bool Database::InsertRecords(int category_id, const std::string &time_begin, con
 	}
 
 	sqlite3_finalize(stmt); // stmt 解法
+	return true;
+}
+
+bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ取得
+	if (db == nullptr){
+		return false;
+	}
+
+	const char* sql = "SELECT id, parent_id, name FROM categories;";
+
+	
+	sqlite3_stmt* stmt = nullptr;
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
+		return false;
+	}
+
+	while (sqlite3_step(stmt) == SQLITE_ROW) {
+		Category c;
+		c.id = sqlite3_column_int(stmt, 0);
+		c.parent_id = sqlite3_column_int(stmt, 1);
+		c.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); // reinterpret_cast<const char*> で強制的に std::string に変換
+	
+		out.push_back(c);
+	}
+
+	sqlite3_finalize(stmt);
 	return true;
 }
 

@@ -13,6 +13,12 @@ public:
 	// --- 書き込み ---
 	bool InsertCategories(const std::string &name, int parent_id); // カテゴリ名，親ID
 	bool InsertRecords(int category_id, const std::string &time_begin, const std::string &time_end); // カテゴリテーブルでのID，開始時刻，終了時刻
+	struct Category{
+		int id;
+		int parent_id;
+		std::string name;
+	};
+	bool GetAllCategories(std::vector<Category>& out);
 	// ------
 
 

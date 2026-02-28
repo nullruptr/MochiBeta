@@ -1,7 +1,10 @@
+#include <vector>
+#include <wx/treebase.h>
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
+#include "tree_item_data.hpp"
 #include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/record/record_window.hpp"
@@ -170,6 +173,8 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	SetSizer(sizermain);
 	SetSize(wxSize(900, 600));
 	CenterOnParent(); // 親ウィンドウの真ん中に表示する
+
+	LoadCategories(); // DB からカテゴリロード
 }
 
 void TimeLog::OnTreeRightClick(wxTreeEvent& event){
@@ -209,7 +214,6 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 
 	// マウスカーソル位置にメニューを表示する
 	PopupMenu(&menu);
-	
 
 }
 
@@ -292,6 +296,15 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 		return;
 	}
 
+	// 親ノード取得
+	wxTreeItemId parent = m_tree->GetItemParent(item);
+
+	int parent_id = 0;
+
+	if (parent.IsOk()){
+	// 未実装
+	}
+
 	wxString categoryName = m_categoryText->GetValue();
 
 	if (m_dbPath.IsEmpty()) { // 空判定
@@ -307,7 +320,7 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 
 	// --- DB 保存処理 ---
 
-	bool result = db.InsertCategories(nameStd, 1);
+	bool result = db.InsertCategories(nameStd, 0);
 
 	if (!result){ // エラー処理
 		wxMessageBox(
@@ -321,6 +334,35 @@ void TimeLog::OnSaveCategory(wxCommandEvent &event){
 
 	// 更新処理
 	m_tree->SetItemText(item, categoryName);
+}
+
+void TimeLog::LoadCategories(){
+	std::vector<Database::Category> categories;
+
+	if (!db.GetAllCategories(categories)){ // 全件格納。無理ならreturn。
+		return;
+	}
+
+	m_tree->DeleteAllItems(); // ツリーリセット
+
+	wxTreeItemId root = m_tree->AddRoot("root"); // 起点rootを作成
+	BuildTree(0, root, categories);
+	m_tree->ExpandAll();
+
+	
+}
+
+void TimeLog::BuildTree(
+		int parentId,
+		wxTreeItemId parentNode,
+		const std::vector<Database::Category>& categories
+		) {
+	for (const auto& c : categories){ // カテゴリ数だけループ
+		if (c.parent_id == parentId){ // DB のparent_id と 引数の数値が同値の時
+			wxTreeItemId node = m_tree->AppendItem(parentNode, c.name); // 親の場所に子の名前でツリー登録
+			BuildTree(c.id, node, categories); // 再起処理。自分のIDとノードを渡して、カテゴリ全件も渡す。子が存在したらぶら下げる。
+		}
+	}
 }
 
 
