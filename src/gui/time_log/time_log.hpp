@@ -13,7 +13,6 @@ public:
 	void OnCreateNewCategory(wxCommandEvent& event);
 	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
-	void OnSaveCategory(wxCommandEvent &event);
 	void LoadCategories();
 	void BuildTree(
 			int parentId,
@@ -25,6 +24,7 @@ public:
 private:
 	// tree をメンバ変数にする
 	wxTreeCtrl* m_tree;
+	wxStaticText *m_categoryStaticText; // カテゴリ名
 	wxTextCtrl *m_categoryText; // ツリーに表示された名称を編集するためのCtrl
 	wxButton *btn_record;
 	wxButton *btn_save;

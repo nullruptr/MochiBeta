@@ -24,6 +24,7 @@ set(SOURCES
 	src/core/db/database.cpp
 	src/gui/connect_db/connect_db.cpp
 	src/gui/record/record_window.cpp
+	src/gui/time_log/edit_category.cpp
 	src/gui/time_log/time_log.cpp
 	src/main.cpp 
 	resource.rc

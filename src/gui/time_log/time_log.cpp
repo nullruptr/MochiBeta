@@ -4,6 +4,7 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
+#include "edit_category.hpp"
 #include "tree_item_data.hpp"
 #include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
@@ -128,11 +129,6 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			wxID_ANY,
 			wxT("記録開始")
 			);
-	btn_save = new wxButton(
-			pnl_time_log,
-			wxID_ANY,
-			_("Save")
-			);
 	btn_end = new wxButton(
 			pnl_time_log,
 			wxID_EXIT,
@@ -140,7 +136,6 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			);
 	bottomSizer->AddStretchSpacer(); // 下部に余白を追加
 	bottomSizer->Add(btn_record, 0, wxRIGHT | wxBOTTOM, 10); // レコードボタンをサイザへ登録
-	bottomSizer->Add(btn_save, 0, wxRIGHT | wxBOTTOM, 10);
 	bottomSizer->Add(btn_end, 0, wxRIGHT | wxBOTTOM, 10); // 終了ボタンをサイザへ登録
 	
 	timelog_sizer->Add(bottomSizer, 0, wxEXPAND); // 下部サイザを時間記録用サイザへ登録
@@ -150,7 +145,6 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	// 記録開始ボタンのBind
 	btn_record->Bind(wxEVT_BUTTON, &TimeLog::OnRecordStart, this); // 記録開始ボタン -> レコード開始ボタン遷移
 	
-	btn_save->Bind(wxEVT_BUTTON, &TimeLog::OnSaveCategory, this); // DB セーブ用
 
 	// F12 でウィンドウを閉じる
 	wxAcceleratorEntry entry;
@@ -226,25 +220,25 @@ void TimeLog::OnCreateNewCategory(wxCommandEvent &event){
 		return;
 	}
 
-	// 新規作成モードに変更
-	m_isCreatingNew = true;
-	m_newCategoryParent = parent; // 親ノード記録
-
+	int parent_db_id = 0;
+	if (parent.IsOk()){
+		TreeItemData* parentData = (TreeItemData*)m_tree->GetItemData(parent);
+		if (parentData) { // データがあるとき(nullptr出ないとき)
+			parent_db_id = parentData->GetId();
+		}
+		// parentData が nullptr (rootノード)なら、parent_db_id = 0 のまま
+	}
 	// 新規ノード名
 	wxString newCategoryName = wxT("New Category");
 
-	// 子ノードを追加
-	wxTreeItemId newItem = m_tree->AppendItem(parent, newCategoryName);
 
-	// 親を展開
-	m_tree->ExpandAll();
-
-	// 追加したノードを選択状態にする
-	m_tree->SelectItem(newItem);
-
-	// TreeCtrl へ反映
-	m_categoryText->SetValue(newCategoryName);
-	m_categoryText->SetFocus();
+	// 編集用画面呼び出し
+	EditCategory dlg(this, newCategoryName, db, parent_db_id); // 編集用ダイアログ呼び出し
+	if (dlg.ShowModal() == wxID_OK) {
+		// 保存成功 -> ツリー再読み込み
+		LoadCategories();
+	}
+	
 }
 
 void TimeLog::OnEditItem(wxCommandEvent& event){
@@ -293,62 +287,6 @@ void TimeLog::OnSetTreeCtrlItem(wxCommandEvent& event){
 	wxString current_DB_Path = cdb.GetPath();
 }
 
-void TimeLog::OnSaveCategory(wxCommandEvent &event){
-
-	// 新規作成モード出なければ何もしない
-	if (!m_isCreatingNew){
-		wxMessageBox(
-			_("Please use 'Create New Category' before saving."),
-			"Info",
-			wxOK | wxICON_INFORMATION,
-			this
-		    );
-        return;
-	}
-	wxTreeItemId item = m_tree->GetSelection();
-
-	// 親ノード取得
-	wxTreeItemId parent = m_tree->GetItemParent(item);
-
-	int parent_db_id = 0;
-	if (parent.IsOk()){
-		TreeItemData* parentData = (TreeItemData*)m_tree->GetItemData(parent);
-		if (parentData) { // データがあるとき(nullptr出ないとき)
-			parent_db_id = parentData->GetId();
-		}
-		// parentData が nullptr (rootノード)なら、parent_db_id = 0 のまま
-	}
-	wxString categoryName = m_categoryText->GetValue();
-	std::string nameStd = categoryName.ToStdString(); // wxString を、std::string へ変換
-
-	if (categoryName.IsEmpty()) { // 空判定
-		wxMessageBox(
-			_("Category name is empty"),
-			"Error",
-			wxOK | wxICON_WARNING,
-			this);
-		return;
-	}
-
-
-	// --- DB 保存処理 ---
-
-	bool result = db.InsertCategories(nameStd, parent_db_id);
-
-	if (result) { // 保存に成功したら、
-		m_isCreatingNew = false; // 新規作成モード解除
-		m_categoryText->Clear(); // 親ノード解放
-		LoadCategories(); // ツリー再読み込み
-	} else {
-		wxMessageBox(
-				_("Unable to save parameter"),
-				"DB Error",
-				wxOK | wxICON_ERROR,
-				this
-			    );
-		return;
-	}
-}
 
 void TimeLog::LoadCategories(){
 	std::vector<Database::Category> categories;
