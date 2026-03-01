@@ -7,7 +7,7 @@
 
 class EditCategory : public wxDialog {
 public:
-	EditCategory(wxWindow* parent, const wxString& categoryName, Database& db, int parentDbId);
+	EditCategory(wxWindow* parent, const wxString& categoryName, Database& db, int parentDbId, int editId);
 	void OnQuit(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 private:
@@ -17,4 +17,5 @@ private:
 
 	Database& m_db;
 	int m_parentDbId;
+	int m_editId; // 0で新規、それ以外なら編集モード
 };

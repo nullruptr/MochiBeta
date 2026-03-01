@@ -3,10 +3,11 @@
 #include <wx/wx.h>
 
 
-EditCategory::EditCategory(wxWindow* parent, const wxString& categoryName, Database& db, int parentDbId)
+EditCategory::EditCategory(wxWindow* parent, const wxString& categoryName, Database& db, int parentDbId, int editId = 0)
 	: wxDialog(parent, wxID_ANY, "Edit Category Dialog", wxDefaultPosition, wxDefaultSize)
 	, m_db(db)
 	, m_parentDbId(parentDbId)
+	, m_editId(editId)
 {
 	wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* CategoryNameSizer = new wxBoxSizer(wxVERTICAL);
@@ -52,7 +53,13 @@ void EditCategory::OnSave(wxCommandEvent& event) { // 保存
 	
 	// --- DB 保存処理 ---
 
-	bool result = m_db.InsertCategories(name.ToStdString(), m_parentDbId);
+	bool result = false;
+
+	if (m_editId == 0) {
+		result = m_db.InsertCategories(m_parentDbId, name.ToStdString());
+	} else {
+		result = m_db.UpdateCategories(m_editId, name.ToStdString());
+	}
 	if(!result) {
 		wxMessageBox(
 				_("Unable to save category"),

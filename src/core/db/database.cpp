@@ -111,7 +111,7 @@ bool Database::Initialize(){
 //
 // -------
 
-bool Database::InsertCategories(const std::string &name, int parent_id){
+bool Database::InsertCategories(int parent_id, const std::string &name){
 	if (db == nullptr){ // DB が開いていなかったら，抜ける
 		return false;
 	}
@@ -198,6 +198,8 @@ bool Database::InsertRecords(int category_id, const std::string &time_begin, con
 }
 
 bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ取得
+	out.clear(); // 安全のため最初に初期化
+
 	if (db == nullptr){
 		return false;
 	}
@@ -217,6 +219,32 @@ bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ�
 		c.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); // reinterpret_cast<const char*> で強制的に std::string に変換
 	
 		out.push_back(c);
+	}
+
+	sqlite3_finalize(stmt);
+	return true;
+}
+
+bool Database::UpdateCategories(int id, const std::string& name){
+	if (db == nullptr){
+		return false;
+	}
+
+	const char* sql = "UPDATE categories SET name = ? WHERE id = ?;";
+
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK){
+		return false;
+	}
+
+	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_int(stmt, 2, id);
+
+	int rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE){
+		sqlite3_finalize(stmt);
+		return false;
 	}
 
 	sqlite3_finalize(stmt);

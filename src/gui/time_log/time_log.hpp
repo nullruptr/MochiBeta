@@ -24,10 +24,7 @@ public:
 private:
 	// tree をメンバ変数にする
 	wxTreeCtrl* m_tree;
-	wxStaticText *m_categoryStaticText; // カテゴリ名
-	wxTextCtrl *m_categoryText; // ツリーに表示された名称を編集するためのCtrl
 	wxButton *btn_record;
-	wxButton *btn_save;
 	wxButton *btn_end;
 
 	// ツリーで右クリックしたときの処理
@@ -38,6 +35,4 @@ private:
 	ConnectDB cdb;
 	Database& db;
 
-	bool m_isCreatingNew = false; // 新規作成中モードか否か
-	wxTreeItemId m_newCategoryParent; // 新規作成中の親ノード
 };

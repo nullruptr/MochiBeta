@@ -1,4 +1,5 @@
 #include <vector>
+#include <wx/stringimpl.h>
 #include <wx/treebase.h>
 #include <wx/wx.h>
 #include <wx/splitter.h>
@@ -99,25 +100,8 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 
 	categorybox->Add(category_st, 0, wxRIGHT | wxEXPAND, 8);
 
-	m_categoryText = new wxTextCtrl(
-			pnl_time_log,
-			wxID_ANY,
-			wxEmptyString,
-			wxDefaultPosition,
-			wxSize(250, -1),
-			wxTE_PROCESS_ENTER
-			);
-
-	m_categoryText->Bind(wxEVT_TEXT_ENTER, [](wxCommandEvent &event){
-		// Enter で子ノードが永遠と追加されるため、フックして何もしないようにする。
-	});
-
-	categorybox->Add(m_categoryText, 0, wxALIGN_CENTER_VERTICAL, 8);
-
 	timelog_sizer->Add(pathBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
 	timelog_sizer->Add(categorybox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
-
-
 	timelog_sizer->AddStretchSpacer(); // 中央に余白を追加
 
 	// 下部の設定
@@ -233,7 +217,12 @@ void TimeLog::OnCreateNewCategory(wxCommandEvent &event){
 
 
 	// 編集用画面呼び出し
-	EditCategory dlg(this, newCategoryName, db, parent_db_id); // 編集用ダイアログ呼び出し
+	EditCategory dlg(this,
+			newCategoryName,
+			db,
+			parent_db_id,
+			0 // 新規のため、編集ID なし
+			); // 編集用ダイアログ呼び出し
 	if (dlg.ShowModal() == wxID_OK) {
 		// 保存成功 -> ツリー再読み込み
 		LoadCategories();
@@ -245,20 +234,29 @@ void TimeLog::OnEditItem(wxCommandEvent& event){
 	// ツリーでクリックされた内容を取得
 	wxTreeItemId item = m_tree->GetFocusedItem();
 
-	// 右クリックしても Item がなかったら処理しない
 	if (!item.IsOk()){
 		return;
 	}
 
-	// 選択されたアイテムの文字列を取得
-	wxString text = m_tree->GetItemText(item);
+	TreeItemData* data = (TreeItemData*)m_tree->GetItemData(item);
 
-		wxMessageBox(
-		wxT("編集対象: ") + text,
-		_("Edit"),
-		wxOK | wxICON_INFORMATION,
-		this
-	);
+	if(!data){
+		return;
+	}
+
+	int id = data->GetId();
+	wxString currentName = m_tree->GetItemText(item);
+
+	EditCategory dlg(this,
+			currentName,
+			db,
+			0, // parentId は編集時不要
+			id // editId
+			);
+
+	if (dlg.ShowModal() == wxID_OK) {
+		LoadCategories(); // ツリー再読み込み
+	}
 }
 
 
