@@ -1,11 +1,16 @@
 #include <vector>
+#include <wx/filefn.h>
+#include <wx/gdicmn.h>
+#include <wx/list.h>
 #include <wx/stringimpl.h>
 #include <wx/treebase.h>
+#include <wx/gbsizer.h>
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 #include "time_log.hpp"
 #include "edit_category.hpp"
+#include "gui/theme/apptheme.hpp"
 #include "tree_item_data.hpp"
 #include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
@@ -23,15 +28,9 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	
 {
 	m_dbPath = dbPath;
-	wxFont font(
-		13,
-		wxFONTFAMILY_DEFAULT,
-		wxFONTSTYLE_NORMAL,
-		wxFONTWEIGHT_NORMAL,
-		false,
-		wxT("ＭＳ 明朝")
-	);
+	wxFont font = AppTheme::GetSystemFont();
 	
+
 	wxBoxSizer* sizermain = new wxBoxSizer(wxVERTICAL); // メインサイザ
 	wxSplitterWindow* splittermain = new wxSplitterWindow(this, wxID_ANY); // 分割作成
 	sizermain->Add(splittermain, 1,wxEXPAND, 0); // 分割をメインサイザへ追加
@@ -78,36 +77,82 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	// 背景色設定
 	pnl_time_log->SetBackgroundColour(wxColour(192, 192, 192));
 
-	wxBoxSizer *timelog_sizer = new wxBoxSizer(wxVERTICAL); // サイザ
+	wxGridBagSizer* timelog_sizer = new wxGridBagSizer(5, 5); // (垂直間隔、水平間隔)
+	timelog_sizer->AddGrowableCol(1, 1); // 右辺を伸縮対象に
 
 	// パス表示用エリア
 	
-	wxBoxSizer* pathBox = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* path_st = new wxStaticText(pnl_time_log, wxID_ANY, _("DB Path: ") + m_dbPath); // パス表示
-	path_st->SetFont(font);
-	path_st->SetForegroundColour(*wxWHITE);
-	path_st->SetBackgroundColour(wxColour(0, 51, 153));
+	int row = 0;
 
-	pathBox->Add(path_st, 0, wxRIGHT | wxEXPAND, 8);
+
+	wxStaticText* path_label = new wxStaticText(pnl_time_log, wxID_ANY, _("DB Path: ")); // パス表示
+	path_label->SetFont(font);
+	path_label->SetForegroundColour(AppTheme::GetTextWhite());
+	path_label->SetBackgroundColour(AppTheme::GetBgBlue());
+
+	wxStaticText* path_value = new wxStaticText(pnl_time_log, wxID_ANY, m_dbPath);
+	path_value->SetFont(font);
+	path_value->SetForegroundColour(AppTheme::GetTextWhite());
+	path_value->SetBackgroundColour(AppTheme::GetBgBlue());
+
+	timelog_sizer->Add(
+			path_label,
+			wxGBPosition(row, 0),
+			wxDefaultSpan,
+			wxEXPAND | wxALIGN_CENTER_VERTICAL
+			);
+
+	timelog_sizer->Add(
+			path_value,
+			wxGBPosition(row, 1),
+			wxDefaultSpan,
+			wxEXPAND | wxALIGN_CENTER_VERTICAL
+			);
+
+	row++;
 	
 	// カテゴリ表示用エリア
-	wxStaticText* category_st = new wxStaticText(pnl_time_log, wxID_ANY, _("Category Name: ")); // カテゴリ StaticText
+	
+	wxStaticText* category_label = new wxStaticText(pnl_time_log, wxID_ANY, _("Category Name:"));
+	category_label->SetFont(font);
+	category_label->SetForegroundColour(AppTheme::GetTextWhite());
+	category_label->SetBackgroundColour(AppTheme::GetBgBlue());
 
-	wxBoxSizer *categorybox = new wxBoxSizer(wxHORIZONTAL);
-	category_st->SetFont(font);
-	category_st->SetForegroundColour(*wxWHITE);
-	category_st->SetBackgroundColour(wxColour(0, 51, 153));
+	wxStaticText* category_value = new wxStaticText(pnl_time_log, wxID_ANY, _("None"));
+	category_value->SetFont(font);
+	category_value->SetForegroundColour(AppTheme::GetTextWhite());
+	category_value->SetBackgroundColour(AppTheme::GetBgBlue());
 
-	categorybox->Add(category_st, 0, wxRIGHT | wxEXPAND, 8);
+	timelog_sizer->Add(
+			category_label,
+			wxGBPosition(row, 0),
+			wxDefaultSpan,
+			wxALIGN_CENTER_VERTICAL
+			);
 
-	timelog_sizer->Add(pathBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
-	timelog_sizer->Add(categorybox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 5);
-	timelog_sizer->AddStretchSpacer(); // 中央に余白を追加
+	timelog_sizer->Add(
+			category_value,
+			wxGBPosition(row, 1),
+			wxDefaultSpan,
+			wxEXPAND
+			);
 
-	// 下部の設定
+	row++;
+
+	// 中央余白
+	timelog_sizer->Add(
+			0,
+			0,
+			wxGBPosition(row, 0),
+			wxGBSpan(1, 2),
+			wxEXPAND
+			);
+	timelog_sizer->AddGrowableRow(row, 1);
+	row++;
+
+	// ボタン (下部)
 	wxBoxSizer* bottomSizer = new wxBoxSizer(wxHORIZONTAL); // 下部ボタン用サイザ
 	
-
 	btn_record = new wxButton(
 			pnl_time_log,
 			wxID_ANY,
@@ -118,11 +163,16 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			wxID_EXIT,
 			wxT("終了(F12)")
 			);
-	bottomSizer->AddStretchSpacer(); // 下部に余白を追加
-	bottomSizer->Add(btn_record, 0, wxRIGHT | wxBOTTOM, 10); // レコードボタンをサイザへ登録
-	bottomSizer->Add(btn_end, 0, wxRIGHT | wxBOTTOM, 10); // 終了ボタンをサイザへ登録
+	bottomSizer->AddStretchSpacer(1); // 下部に余白を追加
+	bottomSizer->Add(btn_record, 0, wxRIGHT, 10); // レコードボタンをサイザへ登録
+	bottomSizer->Add(btn_end, 0); // 終了ボタンをサイザへ登録
 	
-	timelog_sizer->Add(bottomSizer, 0, wxEXPAND); // 下部サイザを時間記録用サイザへ登録
+	timelog_sizer->Add(
+			bottomSizer,
+			wxGBPosition(row, 0),
+			wxGBSpan(1, 2), // 2列結合
+			wxEXPAND
+			); // 下部サイザを時間記録用サイザへ登録
 	
 	pnl_time_log->SetSizer(timelog_sizer); // サイザをパネルに登録
 	
