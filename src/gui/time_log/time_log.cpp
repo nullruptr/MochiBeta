@@ -1,4 +1,5 @@
 #include <vector>
+#include <wx/event.h>
 #include <wx/filefn.h>
 #include <wx/gdicmn.h>
 #include <wx/list.h>
@@ -69,6 +70,9 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			&TimeLog::OnTreeRightClick,
 			this
 		    );
+
+	// --- 項目が選択されたとき ---
+	m_tree->Bind(wxEVT_TREE_SEL_CHANGED, &TimeLog::OnItemSelected, this); // 
 	// end settings
 	
 	// --- end TreeCtrl --- 
@@ -118,7 +122,7 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	category_label->SetForegroundColour(AppTheme::GetTextWhite());
 	category_label->SetBackgroundColour(AppTheme::GetBgBlue());
 
-	wxStaticText* category_value = new wxStaticText(pnl_time_log, wxID_ANY, _("None"));
+	category_value = new wxStaticText(pnl_time_log, wxID_ANY, _("None"));
 	category_value->SetFont(font);
 	category_value->SetForegroundColour(AppTheme::GetTextWhite());
 	category_value->SetBackgroundColour(AppTheme::GetBgBlue());
@@ -127,14 +131,14 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			category_label,
 			wxGBPosition(row, 0),
 			wxDefaultSpan,
-			wxALIGN_CENTER_VERTICAL
+			wxEXPAND | wxALIGN_CENTER_VERTICAL
 			);
 
 	timelog_sizer->Add(
 			category_value,
 			wxGBPosition(row, 1),
 			wxDefaultSpan,
-			wxEXPAND
+			wxEXPAND | wxALIGN_CENTER_VERTICAL
 			);
 
 	row++;
@@ -178,7 +182,7 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	
 	// 記録開始ボタンのBind
 	btn_record->Bind(wxEVT_BUTTON, &TimeLog::OnRecordStart, this); // 記録開始ボタン -> レコード開始ボタン遷移
-	
+
 
 	// F12 でウィンドウを閉じる
 	wxAcceleratorEntry entry;
@@ -333,6 +337,19 @@ void TimeLog::OnRecordStart(wxCommandEvent& event){ // レコード開始ウィ�
 
 void TimeLog::OnSetTreeCtrlItem(wxCommandEvent& event){
 	wxString current_DB_Path = cdb.GetPath();
+}
+
+void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックしたら、右画面の内容更新
+	wxTreeItemId item = event.GetItem();
+
+	if (item.IsOk()) {
+		if (item == m_tree->GetRootItem()) { // root の時、none 表示
+			category_value->SetLabel(_("None"));
+		} else {
+			category_value->SetLabel(m_tree->GetItemText(item));
+		}
+		category_value->GetParent()->Layout(); // レイアウト再計算。
+	}
 }
 
 

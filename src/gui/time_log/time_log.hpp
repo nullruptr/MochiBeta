@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
+#include <wx/event.h>
 #include <wx/string.h>
 #include <wx/treebase.h>
 #include <wx/wx.h>
@@ -13,6 +14,7 @@ public:
 	void OnCreateNewCategory(wxCommandEvent& event);
 	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
+	void OnItemSelected(wxTreeEvent& event); // TreeCtrl の項目が選択されたときに呼び出す
 	void LoadCategories();
 	void BuildTree(
 			int parentId,
@@ -34,5 +36,5 @@ private:
 	wxString m_dbPath;
 	ConnectDB cdb;
 	Database& db;
-
+	wxStaticText* category_value;
 };
