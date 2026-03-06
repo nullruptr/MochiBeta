@@ -1,9 +1,5 @@
 #include <vector>
-#include <wx/event.h>
-#include <wx/filefn.h>
 #include <wx/gdicmn.h>
-#include <wx/list.h>
-#include <wx/stringimpl.h>
 #include <wx/treebase.h>
 #include <wx/gbsizer.h>
 #include <wx/wx.h>
@@ -92,12 +88,11 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	wxStaticText* path_label = new wxStaticText(pnl_time_log, wxID_ANY, _("DB Path: ")); // パス表示
 	path_label->SetFont(font);
 	path_label->SetForegroundColour(AppTheme::GetTextWhite());
-	path_label->SetBackgroundColour(AppTheme::GetBgBlue());
+	path_label->SetBackgroundColour(*wxBLUE);
 
 	wxStaticText* path_value = new wxStaticText(pnl_time_log, wxID_ANY, m_dbPath);
 	path_value->SetFont(font);
-	path_value->SetForegroundColour(AppTheme::GetTextWhite());
-	path_value->SetBackgroundColour(AppTheme::GetBgBlue());
+	path_value->SetBackgroundColour(AppTheme::GetLightBlue());
 
 	timelog_sizer->Add(
 			path_label,
@@ -120,12 +115,11 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	wxStaticText* category_label = new wxStaticText(pnl_time_log, wxID_ANY, _("Category Name:"));
 	category_label->SetFont(font);
 	category_label->SetForegroundColour(AppTheme::GetTextWhite());
-	category_label->SetBackgroundColour(AppTheme::GetBgBlue());
+	category_label->SetBackgroundColour(*wxBLUE);
 
 	category_value = new wxStaticText(pnl_time_log, wxID_ANY, _("None"));
 	category_value->SetFont(font);
-	category_value->SetForegroundColour(AppTheme::GetTextWhite());
-	category_value->SetBackgroundColour(AppTheme::GetBgBlue());
+	category_value->SetBackgroundColour(AppTheme::GetLightBlue());
 
 	timelog_sizer->Add(
 			category_label,
