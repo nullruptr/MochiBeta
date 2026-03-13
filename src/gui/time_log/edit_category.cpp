@@ -56,9 +56,9 @@ void EditCategory::OnSave(wxCommandEvent& event) { // 保存
 	bool result = false;
 
 	if (m_editId == 0) {
-		result = m_db.InsertCategories(m_parentDbId, name.ToStdString());
+		result = m_db.InsertCategories(m_parentDbId, std::string(name.utf8_string()));
 	} else {
-		result = m_db.UpdateCategories(m_editId, name.ToStdString());
+		result = m_db.UpdateCategories(m_editId, std::string(name.utf8_string()));
 	}
 	if(!result) {
 		wxMessageBox(

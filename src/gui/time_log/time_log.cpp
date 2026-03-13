@@ -370,7 +370,8 @@ void TimeLog::BuildTree(
 		) {
 	for (const auto& c : categories){ // カテゴリ数だけループ
 		if (c.parent_id == parentId){ // DB のparent_id と 引数の数値が同値の時
-			wxTreeItemId node = m_tree->AppendItem(parentNode, c.name, -1, -1, new TreeItemData(c.id)); // 親の場所に子の名前でツリー登録。同時にID(c.id) をデータとして紐付け。
+			wxString displayName = wxString::FromUTF8(c.name.c_str()); // UTF8 で読み込み
+			wxTreeItemId node = m_tree->AppendItem(parentNode, displayName, -1, -1, new TreeItemData(c.id)); // 親の場所に子の名前でツリー登録。同時にID(c.id) をデータとして紐付け。
 			BuildTree(c.id, node, categories); // 再起処理。自分のIDとノードを渡して、カテゴリ全件も渡す。子が存在したらぶら下げる。
 		}
 	}

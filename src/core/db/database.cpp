@@ -216,7 +216,12 @@ bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ�
 		Category c;
 		c.id = sqlite3_column_int(stmt, 0);
 		c.parent_id = sqlite3_column_int(stmt, 1);
-		c.name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); // reinterpret_cast<const char*> で強制的に std::string に変換
+		const char* text = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); // reinterpret_cast<const char*> で強制的に std::string に変換
+		if (text != nullptr) {
+			c.name = text; // 内容が有効なら、その文字列を代入。
+		} else {
+			c.name = ""; // NULL なら空文字を代入
+		}
 	
 		out.push_back(c);
 	}
