@@ -1,5 +1,6 @@
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
+#include <wx/filedlg.h>
 #include <wx/wx.h>
 
 ConnectDB::ConnectDB(wxWindow* parent)
@@ -75,22 +76,21 @@ void ConnectDB::OnConnect(wxCommandEvent &event){
 }
 
 void ConnectDB::OnCreateNew(wxCommandEvent &event){
-	wxDirDialog dirDialog(
-			this,
-			_("Select Directory"),
-			"",
-			wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST
-			);
+	wxFileDialog saveFileDialog(
+		this, // 親指定
+		_("Create New SQLite Database"), // タイトルバーに表示される文字列
+		"", // 初期ディレクトリ
+		"mochibeta.db", // デフォルトファイル名
+		"SQLite DB (*.db)|*.db", // 表示名|拡張子|表示名|拡張子
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT // 開くダイアログ | 存在しないファイルは選択できない
+	);
 
-	if (dirDialog.ShowModal() != wxID_OK){ // OK 以外でファイル選択ダイアログ終了
+	if (saveFileDialog.ShowModal() != wxID_OK){ // OK 以外でファイル選択ダイアログ終了
 		return;
 	}
 
-	wxString dirPath = dirDialog.GetPath(); // 入力されたパス
+	wxString filePath = saveFileDialog.GetPath(); // 入力されたパス
 	
-	// ディレクトリ + セパレータ + DB名 -> これで新規作成したファイルのパス作成
-	wxString filePath = dirPath + wxFILE_SEP_PATH + "mochibeta.db";
-
 	Database db;
 
 	if (wxFileExists(filePath)){ // ファイルが既に存在している場合
@@ -99,11 +99,19 @@ void ConnectDB::OnCreateNew(wxCommandEvent &event){
 	}
 
 	if (!db.Create(filePath.ToStdString())){ // 新規ファイル作成に失敗したとき
-		wxMessageBox(_("DB creation failed"));
+		wxMessageBox(
+				_("DB creation failed"),
+				_("Error"),
+				wxOK | wxICON_ERROR
+				);
+		return;
 	}
 
 	if (!db.Initialize()){ // DB 初期化に失敗したとき
-		wxMessageBox(_("DB initialization failed"));
+		wxMessageBox(_("DB initialization failed"),
+				_("Error"),
+				wxOK | wxICON_ERROR
+				);
 		return;
 	}
 
