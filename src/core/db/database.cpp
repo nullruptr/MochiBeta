@@ -204,7 +204,7 @@ bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ�
 		return false;
 	}
 
-	const char* sql = "SELECT id, parent_id, name FROM categories;";
+	const char* sql = "SELECT id, parent_id, name FROM categories ORDER BY name ASC;";
 
 	
 	sqlite3_stmt* stmt = nullptr;
