@@ -1,5 +1,4 @@
 #include <vector>
-#include <wx/gdicmn.h>
 #include <wx/treebase.h>
 #include <wx/gbsizer.h>
 #include <wx/wx.h>
@@ -12,6 +11,7 @@
 #include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/record/record_window.hpp"
+#include "core/clock/clock.hpp"
 
 enum{
 	ID_TREE_EDIT,
@@ -310,32 +310,45 @@ void TimeLog::OnEditItem(wxCommandEvent& event){
 
 void TimeLog::OnRecordStart(wxCommandEvent& event){ // レコード開始ウィンドウ遷移処理
 	
+	// 開始時刻を保持
+	startTime = cl.now_utc_iso8601();
+
 	this->Hide(); // 親ウィンドウを隠す
-	
 	RecordWindow* rec_wnd = new RecordWindow(this); // record_window 生成
 	
 	// RecordWindow の終了処理をフック。
 	// wxEVT_CLOSE_WINDOW (Alt + F4 や、xボタン)の発火を感知したら、自分の関数に持ち込んで処理する。
 	// ラムダ式の[this]は、一見コピーキャプチャに見えるが、thisはポインタなので、this オブジェクトをコピーしているわけではない。
 	rec_wnd->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& event){
-
+		// 終了時間を保持
+		endTime = cl.now_utc_iso8601();
+		// 時間をDB に書き込み
+		this->db.InsertRecords(m_selectedCategoryId, startTime, endTime);
 		this->Show(); // 隠していたものを再表示
 		this->Raise(); // ウィンドウを最上位へ表示
 		event.Skip(); // デフォルトの wxFrame クローズ処理に処理を委譲する
 	}
 	);
-	
 	rec_wnd->Show(); // 生成したものを表示
-
 }
 
 void TimeLog::OnSetTreeCtrlItem(wxCommandEvent& event){
 	wxString current_DB_Path = cdb.GetPath();
 }
 
-void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックしたら、右画面の内容更新
+void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックしたら、情報を取得し、右画面の内容更新
+	// クリックされたツリーの項目のwxTreeItemId を取得
 	wxTreeItemId item = event.GetItem();
+	// 紐づけたツリーのID を取得
+	TreeItemData* data = static_cast<TreeItemData*>(m_tree->GetItemData(item));
 
+	if (data) {
+		// 内容が有効なら、ID を保存。
+		this->m_selectedCategoryId = data->GetId();
+	}
+
+
+	// 右画面更新処理
 	if (item.IsOk()) {
 		if (item == m_tree->GetRootItem()) { // root の時、none 表示
 			category_value->SetLabel(_("None"));
