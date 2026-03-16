@@ -21,6 +21,8 @@ public:
 	bool GetAllCategories(std::vector<Category>& out);
 	bool UpdateCategories(int id, const std::string& name);
 	// ------
+	bool HasRecords(int category_id);   // 記録の存在確認
+	bool HideCategory(int id);          // ソフトデリート
 
 
 	void Close(); // DB クローズ処理

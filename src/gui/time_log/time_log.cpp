@@ -1,4 +1,6 @@
 #include <vector>
+#include <wx/event.h>
+#include <wx/msgdlg.h>
 #include <wx/treebase.h>
 #include <wx/gbsizer.h>
 #include <wx/wx.h>
@@ -220,7 +222,7 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 
 	menu.Append(ID_CREATE, _("Create New Category"));
 	menu.Append(wxID_EDIT, _("Edit"));
-	menu.Append(wxID_ANY, _("Delete"));
+	menu.Append(wxID_DELETE, _("Delete"));
 
 
 	Bind(
@@ -230,7 +232,7 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 		ID_CREATE	
 	);
 	//wxID_MENUのメニューにおいて、wxID_EDITが呼ばれたら、TimeLog::OnEditItemを呼び出すよう指示。
-	//
+
 	Bind(
 		wxEVT_MENU,
 		&TimeLog::OnEditItem,
@@ -238,6 +240,12 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 		wxID_EDIT
 	);
 
+	Bind(
+		wxEVT_MENU,
+		&TimeLog::OnDeleteItem,
+		this,
+		wxID_DELETE
+	);
 	// マウスカーソル位置にメニューを表示する
 	PopupMenu(&menu);
 
@@ -357,6 +365,44 @@ void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックし
 		}
 		category_value->GetParent()->Layout(); // レイアウト再計算。
 	}
+}
+
+void TimeLog::OnDeleteItem(wxCommandEvent& event){ // 削除および非表示処理
+	wxTreeItemId item = m_tree->GetFocusedItem(); // 選択されたアイテム情報取得
+
+	if (!item.IsOk()) return; 
+	
+	TreeItemData* data = (TreeItemData*)m_tree->GetItemData(item); 
+	if (!data) return;
+
+	int id = data->GetId();
+	wxString name = m_tree->GetItemText(item);
+
+	if (db.HasRecords(id)) {
+		int ans = wxMessageBox(
+				wxString::Format(_("'%s' has records.\n Are you sure you want to hide this category?"), name),
+				_("Check"),
+				wxYES_NO | wxICON_QUESTION,
+				this
+				);
+		if (ans == wxYES) {
+			db.HideCategory(id);
+			LoadCategories();
+		}
+	} else {
+		// 記録がない -> 物理削除(現状は非表示フラグをたてている)
+		int ans = wxMessageBox(
+				wxString::Format(_("Are you sure you want to delete '%s'?"), name),
+				_("Check"),
+				wxYES_NO | wxICON_WARNING,
+				this
+				);
+		if (ans == wxYES) {
+			db.HideCategory(id);
+			LoadCategories();
+		}
+	}
+
 }
 
 
