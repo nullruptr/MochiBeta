@@ -23,7 +23,15 @@ public:
 	// ------
 	bool HasRecords(int category_id);   // 記録の存在確認
 	bool HideCategory(int id);          // ソフトデリート
+	
+	struct RecordSummary {
+	    std::string category_name;
+	    int total_seconds; // 合計秒数
+	};
 
+	bool GetRecordsByDate(const std::string& local_date,
+                      int offset_seconds,
+                      std::vector<RecordSummary>& out);
 
 	void Close(); // DB クローズ処理
 

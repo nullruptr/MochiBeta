@@ -1,32 +1,15 @@
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
 #include "main.hpp"
-#include "core/db/database.hpp"
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
+#include "gui/activity_report/activity_report.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
 	ID_SETTINGS, //設定ウィンドウ
 	ID_TIME_LOG, //時間記録画面
-};
-
-
-// フレーム初期化
-class MBFrame: public wxFrame {
-public:
-	MBFrame(const wxString& title);
-	void OnTimer(wxTimerEvent &event); // 時間表示をリアルタイムで行うために必要
-	void OnQuit(wxCommandEvent &event); // 終了インベント処理
-	void OnTimeLog(wxCommandEvent &event); // 時間記録画面を開く
-	void OnConnectDB(wxCommandEvent &event);
-	Database db;
-	wxString current_DB_Path;
-private:
-	wxTimer timer;
-	wxStaticText *sys_c;
-	wxStaticText *UTC_c;
-	wxFont clock_font;
+	ID_ACTIVITY_REPORT // 実績照会ウィンドウ表示
 };
 
 
@@ -81,13 +64,12 @@ MBFrame::MBFrame(const wxString& title) :
 
 		wxMenu *menuFunctions = new wxMenu;
 		menuFunctions->Append(ID_TIME_LOG, _("Time Log"));
-		menuFunctions->AppendSeparator();
-		menuFunctions->Append(wxID_ANY, _("Template (Not implemented)"));
-		menuFunctions->Append(wxID_ANY, _("Project (Not implemented)"));
+		// menuFunctions->AppendSeparator();
+		// menuFunctions->Append(wxID_ANY, _("Template (Not implemented)"));
+		// menuFunctions->Append(wxID_ANY, _("Project (Not implemented)"));
 
 		wxMenu *menuManagement = new wxMenu;
-		menuManagement->Append(wxID_ANY, _("Edit Category (Not implemented)"));
-		menuManagement->Append(wxID_ANY, _("Activity Report (Not implemented)"));
+		menuManagement->Append(ID_ACTIVITY_REPORT, _("Activity Report"));
 
 		// メニューバーの設定
 		wxMenuBar *menuBar = new wxMenuBar;
@@ -99,6 +81,7 @@ MBFrame::MBFrame(const wxString& title) :
 		Bind(wxEVT_MENU, &MBFrame::OnConnectDB, this, ID_CONNECT_DB); // 接続用ウィンドウ
 		Bind(wxEVT_MENU, &MBFrame::OnQuit, this, wxID_EXIT); // 終了ボタン -> 終了イベント
 		Bind(wxEVT_MENU, &MBFrame::OnTimeLog, this, ID_TIME_LOG);
+		Bind(wxEVT_MENU, &MBFrame::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
 
 		// ステータスバーの設定
@@ -192,6 +175,16 @@ void MBFrame::OnConnectDB(wxCommandEvent& event){
 
 	}
 
+}
+
+void MBFrame::OnActivityReport(wxCommandEvent& event) {
+	if (current_DB_Path.IsEmpty()) {
+		wxMessageBox(_("Unable to connect database"),
+			     "DB Error", wxOK | wxICON_ERROR, this);
+		return;
+	}
+	ActivityReport* report = new ActivityReport(this, db);
+	report->Show(true);
 }
 
 

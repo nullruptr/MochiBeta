@@ -3,6 +3,9 @@
 #include <sqlite3.h>
 #include <string>
 #include <vector>
+#include <map>
+#include <ctime>
+#include <algorithm>
 
 Database::Database() : db(nullptr) {
 	
@@ -295,6 +298,113 @@ bool Database::HideCategory(int id) {
 	return rc == SQLITE_DONE;
 }
 
+// ISO8601 UTC文字列 "YYYY-MM-DDTHH:MM:SSZ" を
+// エポック秒（UTC基準）に変換するヘルパ
+static std::time_t parse_utc_iso8601(const std::string& s) {
+	if (s.size() < 19) return 0;
+	std::tm tm = {};
+	tm.tm_year = std::stoi(s.substr(0, 4)) - 1900;
+	tm.tm_mon  = std::stoi(s.substr(5, 2)) - 1;
+	tm.tm_mday = std::stoi(s.substr(8, 2));
+	tm.tm_hour = std::stoi(s.substr(11, 2));
+	tm.tm_min  = std::stoi(s.substr(14, 2));
+	tm.tm_sec  = std::stoi(s.substr(17, 2));
+    // プラットフォーム非依存のUTC変換
+#ifdef _WIN32
+	return _mkgmtime(&tm);
+#else
+	return timegm(&tm);
+#endif
+}
+
+bool Database::GetRecordsByDate(
+        const std::string& local_date,
+        int offset_seconds,
+        std::vector<RecordSummary>& out)
+{
+	out.clear();
+	if (db == nullptr) return false;
+
+	// ローカル日付の00:00〜23:59をUTCに換算した前後1日を検索範囲にする
+	// 例: JST(+9) の 3/16 → UTC換算で 3/15 も含めて取得
+	// substr で前日・当日の2日分を指定
+	std::string year  = local_date.substr(0, 4);
+	std::string month = local_date.substr(5, 2);
+	std::string day   = local_date.substr(8, 2);
+
+	// UTC前日の日付文字列を作る (簡易: エポック秒経由)
+	std::tm tm_local = {};
+	tm_local.tm_year = std::stoi(year) - 1900;
+	tm_local.tm_mon  = std::stoi(month) - 1;
+	tm_local.tm_mday = std::stoi(day);
+
+#ifdef _WIN32
+	std::time_t t_local_midnight = _mkgmtime(&tm_local);
+#else
+	std::time_t t_local_midnight = timegm(&tm_local);
+#endif
+
+	// ローカル深夜0時のUTC = ローカル深夜0時 - オフセット
+	std::time_t t_utc_start = t_local_midnight - offset_seconds;
+	std::tm* tm_utc_prev = std::gmtime(&t_utc_start);
+	char buf[11];
+	std::strftime(buf, sizeof(buf), "%Y-%m-%d", tm_utc_prev);
+	std::string utc_prev_date = buf; // UTC換算の前日 (または当日)
+
+	const char* sql =
+		"SELECT c.name, r.time_begin, r.time_end "
+		"FROM records r "
+		"JOIN categories c ON r.category_id = c.id "
+		"WHERE substr(r.time_begin, 1, 10) >= ? "
+		"AND substr(r.time_begin, 1, 10) <= ? "
+		"ORDER BY c.name ASC;";
+
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+		return false;
+	}
+
+	sqlite3_bind_text(stmt, 1, utc_prev_date.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, local_date.c_str(), -1, SQLITE_TRANSIENT);
+
+	// ローカル日付の開始・終了エポック秒
+	std::time_t local_day_start = t_local_midnight - offset_seconds; // UTC基準
+	std::time_t local_day_end   = local_day_start + 86400;
+
+	std::map<std::string, int> summary_map;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW) {
+		const char* name_raw  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+		const char* begin_raw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+		const char* end_raw   = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+		if (!name_raw || !begin_raw || !end_raw) continue;
+
+		std::string name = name_raw;
+		std::time_t t_begin = parse_utc_iso8601(begin_raw);
+		std::time_t t_end   = parse_utc_iso8601(end_raw);
+
+		// ローカル日付の範囲にクリップ
+		std::time_t clipped_begin = std::max(t_begin, local_day_start);
+		std::time_t clipped_end   = std::min(t_end,   local_day_end);
+
+		if (clipped_end <= clipped_begin) continue; // この日に含まれない
+
+		int seconds = static_cast<int>(clipped_end - clipped_begin);
+		summary_map[name] += seconds;
+    }
+
+	sqlite3_finalize(stmt);
+
+	for (const auto& kv : summary_map) {
+		RecordSummary rs;
+		rs.category_name = kv.first;
+		rs.total_seconds = kv.second;
+		out.push_back(rs);
+	}
+
+	return true;
+}
 
 
 void Database::Close() { // 閉じる
