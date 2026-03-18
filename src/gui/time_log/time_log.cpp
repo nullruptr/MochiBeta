@@ -53,7 +53,7 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 
 	wxTreeItemId root = tree->AddRoot("root");
 
-	tree->ExpandAll();
+	tree->Expand(root);
 
 	wxBoxSizer* treeSizer = new wxBoxSizer(wxVERTICAL);
 	treeSizer->Add(tree, 1, wxEXPAND);
@@ -417,7 +417,7 @@ void TimeLog::LoadCategories(){
 
 	wxTreeItemId root = m_tree->AddRoot("root"); // 起点rootを作成
 	BuildTree(0, root, categories);
-	m_tree->ExpandAll();
+	m_tree->Expand(root);
 
 	
 }
