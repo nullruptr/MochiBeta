@@ -3,6 +3,8 @@
 #include "core/db/database.hpp"
 #include "core/clock/clock.hpp"
 #include <wx/event.h>
+#include <wx/propgrid/property.h>
+#include <wx/propgrid/propgrid.h>
 #include <wx/string.h>
 #include <wx/treebase.h>
 #include <wx/wx.h>
@@ -43,4 +45,9 @@ private:
 	int m_selectedCategoryId; // 選択されたカテゴリID
 	std::string startTime; // 開始時刻
 	std::string endTime; // 終了時刻
+	
+	// プロパティグリッドの設定
+	wxPropertyGrid* m_pg;
+	wxPGProperty* m_propDbPath;
+	wxPGProperty* m_propCategory;
 };

@@ -9,7 +9,7 @@ set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
 
 # find_package は「外部ライブラリを探す」命令。wxWidgets の中でも core base コンポーネントを使用する，という意味
 # 成功すると， インクルードパス、リンクすべきライブラリ一覧が自動で変数に入る．
-find_package(wxWidgets COMPONENTS core base)
+find_package(wxWidgets COMPONENTS core base propgrid)
 
 include(${wxWidgets_USE_FILE})
 

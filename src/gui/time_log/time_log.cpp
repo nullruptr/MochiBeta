@@ -1,8 +1,6 @@
 #include <vector>
-#include <wx/event.h>
-#include <wx/msgdlg.h>
+#include <wx/propgrid/props.h>
 #include <wx/treebase.h>
-#include <wx/gbsizer.h>
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
@@ -77,78 +75,30 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 
 	// --- begin time_log ---
 	// 背景色設定
-	pnl_time_log->SetBackgroundColour(wxColour(192, 192, 192));
+	pnl_time_log->SetBackgroundColour(wxColour(211, 211, 211));
 
-	wxGridBagSizer* timelog_sizer = new wxGridBagSizer(5, 5); // (垂直間隔、水平間隔)
-	timelog_sizer->AddGrowableCol(1, 1); // 右辺を伸縮対象に
 
-	// パス表示用エリア
+	// プロパティグリッドの作成
 	
-	int row = 0;
-
-
-	wxStaticText* path_label = new wxStaticText(pnl_time_log, wxID_ANY, _("DB Path: ")); // パス表示
-	path_label->SetFont(font);
-	path_label->SetForegroundColour(AppTheme::GetTextWhite());
-	path_label->SetBackgroundColour(*wxBLUE);
-
-	wxStaticText* path_value = new wxStaticText(pnl_time_log, wxID_ANY, m_dbPath);
-	path_value->SetFont(font);
-	path_value->SetBackgroundColour(AppTheme::GetLightBlue());
-
-	timelog_sizer->Add(
-			path_label,
-			wxGBPosition(row, 0),
-			wxDefaultSpan,
-			wxEXPAND | wxALIGN_CENTER_VERTICAL
+	m_pg = new wxPropertyGrid(
+			pnl_time_log,
+			wxID_ANY,
+			wxDefaultPosition,
+			wxDefaultSize,
+			wxPG_BOLD_MODIFIED | wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE
 			);
 
-	timelog_sizer->Add(
-			path_value,
-			wxGBPosition(row, 1),
-			wxDefaultSpan,
-			wxEXPAND | wxALIGN_CENTER_VERTICAL
-			);
-
-	row++;
+	// グリッド設定
+	m_pg->SetMarginColour(wxColour(211, 211, 211));
+	m_pg->SetEmptySpaceColour(wxColour(211, 211, 211));
 	
-	// カテゴリ表示用エリア
-	
-	wxStaticText* category_label = new wxStaticText(pnl_time_log, wxID_ANY, _("Category Name:"));
-	category_label->SetFont(font);
-	category_label->SetForegroundColour(AppTheme::GetTextWhite());
-	category_label->SetBackgroundColour(*wxBLUE);
+	// プロパティ項目の追加
+	m_propDbPath = m_pg->Append(new wxStringProperty(_("DB Path"), wxPG_LABEL, m_dbPath));
+	m_propCategory = m_pg->Append(new wxStringProperty(_("Category Name"), wxPG_LABEL, _("None")));
 
-	category_value = new wxStaticText(pnl_time_log, wxID_ANY, _("None"));
-	category_value->SetFont(font);
-	category_value->SetBackgroundColour(AppTheme::GetLightBlue());
-
-	timelog_sizer->Add(
-			category_label,
-			wxGBPosition(row, 0),
-			wxDefaultSpan,
-			wxEXPAND | wxALIGN_CENTER_VERTICAL
-			);
-
-	timelog_sizer->Add(
-			category_value,
-			wxGBPosition(row, 1),
-			wxDefaultSpan,
-			wxEXPAND | wxALIGN_CENTER_VERTICAL
-			);
-
-	row++;
-
-	// 中央余白
-	timelog_sizer->Add(
-			0,
-			0,
-			wxGBPosition(row, 0),
-			wxGBSpan(1, 2),
-			wxEXPAND
-			);
-	timelog_sizer->AddGrowableRow(row, 1);
-	row++;
+	// 直接編集禁止
+	m_pg->SetPropertyReadOnly(m_propDbPath);
+	m_pg->SetPropertyReadOnly(m_propCategory);
 
 	// ボタン (下部)
 	wxBoxSizer* bottomSizer = new wxBoxSizer(wxHORIZONTAL); // 下部ボタン用サイザ
@@ -164,17 +114,16 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 			wxT("終了(F12)")
 			);
 	bottomSizer->AddStretchSpacer(1); // 下部に余白を追加
-	bottomSizer->Add(btn_record, 0, wxRIGHT, 10); // レコードボタンをサイザへ登録
-	bottomSizer->Add(btn_end, 0); // 終了ボタンをサイザへ登録
+	bottomSizer->Add(btn_record, 0, wxALL, 5); // レコードボタンをサイザへ登録
+	bottomSizer->Add(btn_end, 0, wxALL, 5); // 終了ボタンをサイザへ登録
 	
-	timelog_sizer->Add(
-			bottomSizer,
-			wxGBPosition(row, 0),
-			wxGBSpan(1, 2), // 2列結合
-			wxEXPAND
-			); // 下部サイザを時間記録用サイザへ登録
+	// サイザ
+	wxBoxSizer* pnl_sizer = new wxBoxSizer(wxVERTICAL);
+	pnl_sizer->Add(m_pg, 1, wxEXPAND);
+	pnl_sizer->Add(bottomSizer, 0, wxEXPAND);
+
+	pnl_time_log->SetSizer(pnl_sizer);
 	
-	pnl_time_log->SetSizer(timelog_sizer); // サイザをパネルに登録
 	
 	// 記録開始ボタンのBind
 	btn_record->Bind(wxEVT_BUTTON, &TimeLog::OnRecordStart, this); // 記録開始ボタン -> レコード開始ボタン遷移
@@ -359,11 +308,10 @@ void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックし
 	// 右画面更新処理
 	if (item.IsOk()) {
 		if (item == m_tree->GetRootItem()) { // root の時、none 表示
-			category_value->SetLabel(_("None"));
+			m_pg->SetPropertyValue(m_propCategory, _("None"));
 		} else {
-			category_value->SetLabel(m_tree->GetItemText(item));
+			m_pg->SetPropertyValue(m_propCategory, m_tree->GetItemText(item));
 		}
-		category_value->GetParent()->Layout(); // レイアウト再計算。
 	}
 }
 
