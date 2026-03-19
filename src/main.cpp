@@ -164,7 +164,6 @@ void MBFrame::OnConnectDB(wxCommandEvent& event){
 		std::string path = dlg.GetPath().ToStdString();
 
 		if (db.Connect(path)){
-			wxMessageBox(_("Connected"));
 			// ステータスバーに設定
 			current_DB_Path = dlg.GetPath();
 			SetStatusText(_("Connected"), 0);
