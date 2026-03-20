@@ -15,7 +15,7 @@ class TimeLog : public wxFrame{
 public:
 	TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath);
 	void OnCreateNewCategory(wxCommandEvent& event);
-	void OnRecordStart(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
+	void OnStartRecord(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
 	void OnItemSelected(wxTreeEvent& event); // TreeCtrl の項目が選択されたときに呼び出す
 	void OnDeleteItem(wxCommandEvent& event); // イベント削除
