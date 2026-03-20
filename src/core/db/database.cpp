@@ -298,6 +298,24 @@ bool Database::HideCategory(int id) {
 	return rc == SQLITE_DONE;
 }
 
+bool Database::EditParentId(long long id, long long parent_id) {
+	if (db == nullptr) return false;
+
+	const char* sql = "UPDATE categories SET parent_id = ? WHERE id = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+		return false;
+	}
+
+	sqlite3_bind_int64(stmt, 1, parent_id);
+	sqlite3_bind_int64(stmt, 2, id);
+
+	int rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+	return rc == SQLITE_DONE;
+}
+
 // ISO8601 UTC文字列 "YYYY-MM-DDTHH:MM:SSZ" を
 // エポック秒（UTC基準）に変換するヘルパ
 static std::time_t parse_utc_iso8601(const std::string& s) {

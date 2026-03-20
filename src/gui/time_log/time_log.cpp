@@ -1,4 +1,5 @@
 #include <vector>
+#include <wx/event.h>
 #include <wx/propgrid/props.h>
 #include <wx/treebase.h>
 #include <wx/wx.h>
@@ -7,15 +8,16 @@
 #include "time_log.hpp"
 #include "edit_category.hpp"
 #include "gui/theme/apptheme.hpp"
+#include "gui/time_log/edit_parent_id.hpp"
 #include "tree_item_data.hpp"
 #include "core/db/database.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/record/record_window.hpp"
-#include "core/clock/clock.hpp"
 
 enum{
 	ID_TREE_EDIT,
-	ID_CREATE
+	ID_CREATE,
+	ID_MOVE
 };
 
 TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
@@ -171,6 +173,7 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 
 	menu.Append(ID_CREATE, _("Create New Category"));
 	menu.Append(wxID_EDIT, _("Edit"));
+	menu.Append(ID_MOVE, _("Move"));
 	menu.Append(wxID_DELETE, _("Delete"));
 
 
@@ -187,6 +190,13 @@ void TimeLog::OnTreeRightClick(wxTreeEvent& event){
 		&TimeLog::OnEditItem,
 		this,
 		wxID_EDIT
+	);
+
+	Bind(
+		wxEVT_MENU,
+		&TimeLog::OnEditParentId,
+		this,
+		ID_MOVE
 	);
 
 	Bind(
@@ -319,6 +329,8 @@ void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックし
 	if (data) {
 		// 内容が有効なら、ID を保存。
 		this->m_selectedCategoryId = data->GetId();
+
+
 	}
 
 
@@ -329,6 +341,28 @@ void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックし
 		} else {
 			m_pg->SetPropertyValue(m_propCategory, m_tree->GetItemText(item));
 		}
+	}
+}
+
+void TimeLog::OnEditParentId(wxCommandEvent& event) {
+	wxTreeItemId item = m_tree->GetFocusedItem(); // 選択されたアイテム情報取得
+
+	if (!item.IsOk()) return; 
+	
+	TreeItemData* data = (TreeItemData*)m_tree->GetItemData(item); 
+	if (!data) return;
+
+	int id = data->GetId();
+	wxString name = m_tree->GetItemText(item);
+
+
+	EditParentId dlg(this,
+			id,
+			db
+			);
+
+	if (dlg.ShowModal() == wxID_OK) {
+		LoadCategories(); // ツリー再読み込み
 	}
 }
 

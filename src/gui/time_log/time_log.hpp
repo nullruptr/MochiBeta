@@ -18,6 +18,7 @@ public:
 	void OnStartRecord(wxCommandEvent& event); // レコード開始ウィンドウ遷移ボタン
 	void OnSetTreeCtrlItem(wxCommandEvent &event);
 	void OnItemSelected(wxTreeEvent& event); // TreeCtrl の項目が選択されたときに呼び出す
+	void OnEditParentId(wxCommandEvent& event); // parent id の編集
 	void OnDeleteItem(wxCommandEvent& event); // イベント削除
 	void LoadCategories();
 	void BuildTree(

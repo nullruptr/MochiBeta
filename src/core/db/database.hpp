@@ -23,7 +23,8 @@ public:
 	// ------
 	bool HasRecords(int category_id);   // 記録の存在確認
 	bool HideCategory(int id);          // ソフトデリート
-	
+	bool EditParentId(long long id, long long parent_id); // ツリーアイテム移動
+
 	struct RecordSummary {
 	    std::string category_name;
 	    int total_seconds; // 合計秒数
