@@ -34,6 +34,10 @@ public:
                       std::vector<RecordSummary>& out);
 
 	void Close(); // DB クローズ処理
+	
+	// --- db_record.cpp ---
+	long long StartRecord(int category_id);
+	bool EndRecord(int record_id);
 
 private:
 	sqlite3* db;
