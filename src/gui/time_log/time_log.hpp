@@ -51,4 +51,5 @@ private:
 	wxPropertyGrid* m_pg;
 	wxPGProperty* m_propDbPath;
 	wxPGProperty* m_propCategory;
+	wxPGProperty* m_propID;
 };

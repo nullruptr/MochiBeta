@@ -96,10 +96,12 @@ TimeLog::TimeLog(wxWindow* parent, Database &dbRef, const wxString& dbPath)
 	
 	// プロパティ項目の追加
 	m_propDbPath = m_pg->Append(new wxStringProperty(_("DB Path"), wxPG_LABEL, m_dbPath));
+	m_propID = m_pg->Append(new wxStringProperty(_("ID"), wxPG_LABEL, _("0")));
 	m_propCategory = m_pg->Append(new wxStringProperty(_("Category Name"), wxPG_LABEL, _("None")));
 
 	// 直接編集禁止
 	m_pg->SetPropertyReadOnly(m_propDbPath);
+	m_pg->SetPropertyReadOnly(m_propID);
 	m_pg->SetPropertyReadOnly(m_propCategory);
 
 	// ボタン (下部)
@@ -329,16 +331,16 @@ void TimeLog::OnItemSelected(wxTreeEvent& event){ // ツリーをクリックし
 	if (data) {
 		// 内容が有効なら、ID を保存。
 		this->m_selectedCategoryId = data->GetId();
-
-
 	}
 
 
 	// 右画面更新処理
 	if (item.IsOk()) {
-		if (item == m_tree->GetRootItem()) { // root の時、none 表示
+		if (item == m_tree->GetRootItem()) { // root の時の処理
+			m_pg->SetPropertyValue(m_propID, _("None"));
 			m_pg->SetPropertyValue(m_propCategory, _("None"));
 		} else {
+			m_pg->SetPropertyValue(m_propID, m_selectedCategoryId);
 			m_pg->SetPropertyValue(m_propCategory, m_tree->GetItemText(item));
 		}
 	}
