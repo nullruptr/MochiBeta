@@ -161,7 +161,7 @@ void MBFrame::OnConnectDB(wxCommandEvent& event){
 	ConnectDB dlg(this); // 新規ダイアログ作成
 
 	if (dlg.ShowModal() == wxID_OK){ // モーダル表示。ファイル確認完了後、接続処理へ。
-		std::string path = dlg.GetPath().ToStdString();
+		std::string path = std::string(dlg.GetPath().ToUTF8());
 
 		if (db.Connect(path)){
 			// ステータスバーに設定
