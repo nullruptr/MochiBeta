@@ -4,6 +4,7 @@
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/activity_report/activity_report.hpp"
+#include "gui/mainwnd/mainwnd.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -205,6 +206,9 @@ bool MBApp::OnInit() {
 	locale.AddCatalog("mb");
 	MBFrame *mainFrame = new MBFrame("MochiBeta"); // Build habits the sticky way
 	mainFrame->Show(true); 
+	Mainwnd *mainwnd = new Mainwnd(nullptr); 
+	mainwnd->SetTitle("MochiBeta - AUI Version"); // タイトルは後から設定するか、コンストラクタを書き換える
+	mainwnd->Show(true);
 	return true;
 }
 
