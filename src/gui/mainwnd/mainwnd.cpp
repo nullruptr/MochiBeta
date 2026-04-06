@@ -2,6 +2,7 @@
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
 #include "mainwnd.hpp"
+#include "gui/mainwnd/dashboard/dashboard.hpp"
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/activity_report/activity_report.hpp"
@@ -35,10 +36,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
-
-	// テキストコントロールの作成
-	wxTextCtrl* main = new wxTextCtrl(this, wxID_ANY, _("Main Content"), 
-                                       wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	// Dashboard
+	m_dashboard = new Dashboard(this, db);
 	// Clock パネルの生成
 	m_clock = new Clock(this);
 	// Recording
@@ -46,7 +45,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	// TreeCtrl
 	m_categoryTree = new CategoryTree(this, db);
 
-	m_mgr.AddPane(main, wxAuiPaneInfo().CenterPane());
+	m_mgr.AddPane(m_dashboard, wxAuiPaneInfo().CenterPane());
 
 	m_mgr.AddPane(m_clock, wxAuiPaneInfo()
 	    .Name(wxT("clockPane"))      // 内部識別名
@@ -61,10 +60,10 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	);
 	
 	m_mgr.AddPane(m_recording, wxAuiPaneInfo()
-        .Right()
+        .Bottom()
         .Caption(_("Recording"))
         .Name(wxT("Recording_wnd"))
-        .BestSize(250, -1)
+        .BestSize(-1, 250)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
 	); 

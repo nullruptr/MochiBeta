@@ -6,6 +6,7 @@
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 #include "gui/mainwnd/clock/clock.hpp"
 #include "gui/mainwnd/recording/recording.hpp"
+#include "gui/mainwnd/dashboard/dashboard.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -33,4 +34,5 @@ private:
 	CategoryTree* m_categoryTree;
 	Clock* m_clock;
 	Recording* m_recording;
+	Dashboard* m_dashboard;
 };
