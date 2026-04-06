@@ -1,9 +1,11 @@
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
+#include <wx/treectrl.h>
 #include "mainwnd.hpp"
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
 #include "gui/activity_report/activity_report.hpp"
+#include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	wxDefaultPosition, wxSize(800,600),
@@ -33,12 +35,11 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
+	// TreeCtrl
+	m_categoryTree = new CategoryTree(this, db);
+
 	// テキストコントロールの作成
-	wxTextCtrl* text1 = new wxTextCtrl(this, wxID_ANY, _("Pane 1"), 
-			       wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-	wxTextCtrl* text2 = new wxTextCtrl(this, wxID_ANY, _("Pane 2"), 
-			       wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-	wxTextCtrl* text3 = new wxTextCtrl(this, wxID_ANY, _("Main Content"), 
+	wxTextCtrl* main = new wxTextCtrl(this, wxID_ANY, _("Main Content"), 
                                        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 
 	// ステータスバーの設定
@@ -55,9 +56,17 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	CenterOnScreen(); // 画面真ん中に表示
 	
         // add the panes to the manager
-	m_mgr.AddPane(text1, wxAuiPaneInfo().Left().Caption(_("Pane Number One")));
-	m_mgr.AddPane(text2, wxAuiPaneInfo().Bottom().Caption(_("Pane Number Two")));
-	m_mgr.AddPane(text3, wxAuiPaneInfo().CenterPane());
+	m_mgr.AddPane(m_categoryTree, wxAuiPaneInfo()
+        .Left()
+        .Caption(_("Categories"))
+        .Name(wxT("treePane"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.CloseButton(false) // 閉じるボタン無効
+	.Movable(false) // ドラッグして移動不可
+	.DockFixed(false) // ドッキング固定
+	.Floatable(false)); // ウィンドウをして独立不可
+	m_mgr.AddPane(main, wxAuiPaneInfo().CenterPane());
 
         // tell the manager to "commit" all the changes just made
         m_mgr.Update();
@@ -102,6 +111,7 @@ void Mainwnd::OnConnectDB(wxCommandEvent& event){
 			current_DB_Path = dlg.GetPath();
 			SetStatusText(_("Connected"), 0);
 			SetStatusText(current_DB_Path, 1);
+			m_categoryTree->UpdateTreeData();
 		} else {
 			wxMessageBox(_("Connection failed"));
 		}

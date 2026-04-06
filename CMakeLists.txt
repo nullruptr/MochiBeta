@@ -27,6 +27,7 @@ set(SOURCES
 	src/core/db/db_record.cpp
 	src/gui/activity_report/activity_report.cpp
 	src/gui/connect_db/connect_db.cpp
+	src/gui/mainwnd/treectrl/treectrl.cpp
 	src/gui/mainwnd/mainwnd.cpp
 	src/gui/record/record_window.cpp
 	src/gui/time_log/edit_category.cpp

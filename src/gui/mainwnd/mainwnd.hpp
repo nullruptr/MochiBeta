@@ -1,6 +1,9 @@
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
+#include <wx/treebase.h>
+#include <wx/treectrl.h>
 #include "core/db/database.hpp"
+#include "gui/mainwnd/treectrl/treectrl.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -19,7 +22,20 @@ Mainwnd(wxWindow* parent);
 	Database db;
 	wxString current_DB_Path;
 	void OnActivityReport(wxCommandEvent& event);
+
+	// --- treectrl.cpp ---
+	void UpdateTreeData();
+	void BuildTree(
+			int parentId,
+			wxTreeItemId parentNode,
+			const std::vector<Database::Category> &categories
+		      );
+	// ------
+	
+	
 virtual ~Mainwnd();
 private:
-    wxAuiManager m_mgr;
+	wxAuiManager m_mgr;
+	CategoryTree* m_categoryTree;
+	wxStaticText* m_clock;
 };
