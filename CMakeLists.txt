@@ -27,6 +27,7 @@ set(SOURCES
 	src/gui/activity_report/activity_report.cpp
 	src/gui/connect_db/connect_db.cpp
 	src/gui/mainwnd/clock/clock.cpp
+	src/gui/mainwnd/recording/recording.cpp
 	src/gui/mainwnd/treectrl/treectrl.cpp
 	src/gui/mainwnd/mainwnd.cpp
 	src/gui/record/record_window.cpp

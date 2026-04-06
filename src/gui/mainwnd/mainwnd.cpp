@@ -35,17 +35,19 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
-	// TreeCtrl
-	m_categoryTree = new CategoryTree(this, db);
 
 	// テキストコントロールの作成
 	wxTextCtrl* main = new wxTextCtrl(this, wxID_ANY, _("Main Content"), 
                                        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-
 	// Clock パネルの生成
 	m_clock = new Clock(this);
+	// Recording
+	m_recording = new Recording(this);
+	// TreeCtrl
+	m_categoryTree = new CategoryTree(this, db);
 
-	// AUI マネージャーへの登録
+	m_mgr.AddPane(main, wxAuiPaneInfo().CenterPane());
+
 	m_mgr.AddPane(m_clock, wxAuiPaneInfo()
 	    .Name(wxT("clockPane"))      // 内部識別名
 	    .Caption(_("Clock"))         // キャプション
@@ -57,6 +59,25 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	    .DockFixed()                 // 位置を固定したい場合
 	    .BestSize(-1, 40)            // 高さを 40px 程度に固定
 	);
+	
+	m_mgr.AddPane(m_recording, wxAuiPaneInfo()
+        .Right()
+        .Caption(_("Recording"))
+        .Name(wxT("Recording_wnd"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.CloseButton(false) // 閉じるボタン無効
+	); 
+
+	m_mgr.AddPane(m_categoryTree, wxAuiPaneInfo()
+        .Left()
+        .Caption(_("Categories"))
+        .Name(wxT("treePane"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.CloseButton(false) // 閉じるボタン無効
+	); 
+
 	// ステータスバーの設定
 	CreateStatusBar(2);
 	// 初期表示
@@ -70,17 +91,6 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 
 	CenterOnScreen(); // 画面真ん中に表示
 	
-        // add the panes to the manager
-	m_mgr.AddPane(m_categoryTree, wxAuiPaneInfo()
-        .Left()
-        .Caption(_("Categories"))
-        .Name(wxT("treePane"))
-        .BestSize(250, -1)
-        .Layer(1)
-	.CloseButton(false) // 閉じるボタン無効
-	); 
-	m_mgr.AddPane(main, wxAuiPaneInfo().CenterPane());
-
         // tell the manager to "commit" all the changes just made
         m_mgr.Update();
     }

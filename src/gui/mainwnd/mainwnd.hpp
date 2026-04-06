@@ -5,6 +5,7 @@
 #include "core/db/database.hpp"
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 #include "gui/mainwnd/clock/clock.hpp"
+#include "gui/mainwnd/recording/recording.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -31,4 +32,5 @@ private:
 	wxAuiManager m_mgr;
 	CategoryTree* m_categoryTree;
 	Clock* m_clock;
+	Recording* m_recording;
 };
