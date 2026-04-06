@@ -21,12 +21,12 @@ find_library(SQLITE3_LIB sqlite3)
 
 # ソースを列挙
 set(SOURCES 
-	src/core/clock/clock.cpp
 	src/core/clock/now_wxstring.cpp
 	src/core/db/database.cpp
 	src/core/db/db_record.cpp
 	src/gui/activity_report/activity_report.cpp
 	src/gui/connect_db/connect_db.cpp
+	src/gui/mainwnd/clock/clock.cpp
 	src/gui/mainwnd/treectrl/treectrl.cpp
 	src/gui/mainwnd/mainwnd.cpp
 	src/gui/record/record_window.cpp

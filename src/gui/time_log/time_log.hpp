@@ -1,7 +1,6 @@
 #pragma once
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
-#include "core/clock/clock.hpp"
 #include <wx/event.h>
 #include <wx/propgrid/property.h>
 #include <wx/propgrid/propgrid.h>
@@ -42,7 +41,6 @@ private:
 	ConnectDB cdb;
 	Database& db;
 	wxStaticText* category_value;
-	Clock cl;
 	int m_selectedCategoryId; // 選択されたカテゴリID
 	std::string startTime; // 開始時刻
 	std::string endTime; // 終了時刻

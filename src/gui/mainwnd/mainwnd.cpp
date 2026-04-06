@@ -42,6 +42,21 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	wxTextCtrl* main = new wxTextCtrl(this, wxID_ANY, _("Main Content"), 
                                        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 
+	// Clock パネルの生成
+	m_clock = new Clock(this);
+
+	// AUI マネージャーへの登録
+	m_mgr.AddPane(m_clock, wxAuiPaneInfo()
+	    .Name(wxT("clockPane"))      // 内部識別名
+	    .Caption(_("Clock"))         // キャプション
+	    .Top()                       // 画面上部に配置
+	    .Layer(1)                    // レイヤー設定（他のペインとの前後関係）
+	    .PaneBorder(false)           // 境界線を消す
+	    .CaptionVisible(false)       // 時計にタイトルバーは不要なので false
+	    .CloseButton(false)          // 閉じられないように設定
+	    .DockFixed()                 // 位置を固定したい場合
+	    .BestSize(-1, 40)            // 高さを 40px 程度に固定
+	);
 	// ステータスバーの設定
 	CreateStatusBar(2);
 	// 初期表示
@@ -63,9 +78,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .BestSize(250, -1)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
-	.Movable(false) // ドラッグして移動不可
-	.DockFixed(false) // ドッキング固定
-	.Floatable(false)); // ウィンドウをして独立不可
+	); 
 	m_mgr.AddPane(main, wxAuiPaneInfo().CenterPane());
 
         // tell the manager to "commit" all the changes just made
