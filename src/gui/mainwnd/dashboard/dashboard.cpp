@@ -1,6 +1,9 @@
 #include "dashboard.hpp"
 #include <wx/datetime.h>
 #include <wx/event.h>
+#include <wx/gdicmn.h>
+#include <wx/sizer.h>
+#include <wx/textctrl.h>
 #include <wx/wx.h>
 
 
@@ -11,17 +14,25 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	// --- info ---
 	wxFlexGridSizer* info_grid = new wxFlexGridSizer(2, 2, 5, 5);
+
 	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
 	wxStaticText* label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
 	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
+
+	// FlexGridSizer に TextCtrl と Button を1マスに同時に格納する為にまとめるためのサイザ
+	// 実質セル結合
+	wxBoxSizer* cat_input_sizer = new wxBoxSizer(wxHORIZONTAL);
 	m_text_cat_name = new wxTextCtrl(this, wxID_ANY, wxEmptyString);
+	m_btn_save = new wxButton(this, wxID_ANY, _("Save"));
+
+	cat_input_sizer->Add(m_text_cat_name, 1, wxEXPAND | wxRIGHT, 5);
+	cat_input_sizer->Add(m_btn_save, 0, wxALIGN_CENTER_VERTICAL);
 
 	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(m_text_cat_name, 0, wxALIGN_CENTER_VERTICAL); 
+	info_grid->Add(cat_input_sizer, 1, wxEXPAND); // サブサイザーを2列目に入れる
 	
-	info_grid->AddGrowableCol(1);
 	sizer->Add(info_grid, 0, wxEXPAND | wxALL, 10);
 
 	// --- レンジ ---

@@ -13,6 +13,7 @@ private:
 	wxChoice *m_date_range;
 	wxTextCtrl* m_text_cat_name;
 	wxStaticText* m_period_display;
+	wxButton *m_btn_save;
 	wxDatePickerCtrl* m_date_picker_start;
 	wxDatePickerCtrl* m_date_picker_end;
 	wxButton *m_btn_update;
