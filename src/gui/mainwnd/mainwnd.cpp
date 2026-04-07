@@ -63,8 +63,10 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Bottom()
         .Caption(_("Recording"))
         .Name(wxT("Recording_wnd"))
-        .BestSize(-1, 250)
-        .Layer(1)
+        .BestSize(250, 250)
+        .Layer(0)
+	.Position(0)
+	.PaneBorder(true)
 	.CloseButton(false) // 閉じるボタン無効
 	); 
 

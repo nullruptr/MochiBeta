@@ -8,9 +8,9 @@ Recording::Recording(wxWindow* parent) : wxPanel(parent) {
 	m_dvlc = new wxDataViewListCtrl(this, wxID_ANY);
 
 	// 列の定義
-	m_dvlc->AppendTextColumn(_("Task"), wxDATAVIEW_CELL_INERT, 150);
-	m_dvlc->AppendTextColumn(_("Content"), wxDATAVIEW_CELL_EDITABLE, 200);
-	m_dvlc->AppendTextColumn(_("Start Time"), wxDATAVIEW_CELL_EDITABLE, 100);
+	m_dvlc->AppendTextColumn(_("Category Name"), wxDATAVIEW_CELL_INERT, 150);
+	m_dvlc->AppendTextColumn(_("Start Time"), wxDATAVIEW_CELL_EDITABLE, 150);
+	m_dvlc->AppendTextColumn(_("Elapsed Time"), wxDATAVIEW_CELL_EDITABLE, 150);
 
 	wxDataViewColumn* buttonCol = new wxDataViewColumn(
 	    _("Action"), 
