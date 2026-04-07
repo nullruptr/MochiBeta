@@ -11,10 +11,17 @@ public:
 private:
 	Database &m_db;
 	wxChoice *m_date_range;
+	wxTextCtrl* m_text_cat_name;
 	wxStaticText* m_period_display;
 	wxDatePickerCtrl* m_date_picker_start;
 	wxDatePickerCtrl* m_date_picker_end;
 	wxButton *m_btn_update;
+	wxButton *m_btn_offset_y_prev;
+	wxButton *m_btn_offset_y_next;
+	wxButton *m_btn_offset_m_prev;
+	wxButton *m_btn_offset_m_next;
+	wxButton *m_btn_offset_d_prev;
+	wxButton *m_btn_offset_d_next;
 };
 
 enum RangeIndex {

@@ -8,8 +8,23 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	: wxPanel(parent, wxID_ANY)
 	  , m_db(dbRef) {
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+	// --- info ---
+	wxFlexGridSizer* info_grid = new wxFlexGridSizer(2, 2, 5, 5);
+	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
+	wxStaticText* label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
+	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
+	m_text_cat_name = new wxTextCtrl(this, wxID_ANY, wxEmptyString);
+
+	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(m_text_cat_name, 0, wxALIGN_CENTER_VERTICAL); 
 	
-	// --- 上部 ---
+	info_grid->AddGrowableCol(1);
+	sizer->Add(info_grid, 0, wxEXPAND | wxALL, 10);
+
+	// --- レンジ ---
 	wxBoxSizer* range_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* date_label = new wxStaticText(this, wxID_ANY, _("Range: "));
 	m_date_range = new wxChoice(this, wxID_ANY);
@@ -40,6 +55,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	m_btn_update = new wxButton(this, wxID_ANY, _("Update"));
 
+
 	range_sizer->Add(date_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	range_sizer->Add(m_date_range, 0, wxALIGN_CENTER_VERTICAL);
 	range_sizer->Add(m_period_display, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
@@ -47,6 +63,44 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	range_sizer->Add(m_date_picker_end, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	range_sizer->Add(m_btn_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	sizer->Add(range_sizer, 0, wxALL, 10);
+
+		// --- オフセット操作エリア ---
+	// 3行（年・月・日）× 3列（ラベル・前へ・次へ）のグリッド
+	wxFlexGridSizer* offset_grid = new wxFlexGridSizer(3, 3, 5, 5);
+
+	// ボタンのサイズ規定（小さく設定）
+	wxSize btn_size(50, 30);
+
+	// --- 年 ---
+	wxStaticText* label_y = new wxStaticText(this, wxID_ANY, _("Year: "));
+	m_btn_offset_y_prev = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, btn_size);
+	m_btn_offset_y_next = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, btn_size);
+
+	// --- 月 ---
+	wxStaticText* label_m = new wxStaticText(this, wxID_ANY, _("Month: "));
+	m_btn_offset_m_prev = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, btn_size);
+	m_btn_offset_m_next = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, btn_size);
+
+	// --- 日 ---
+	wxStaticText* label_d = new wxStaticText(this, wxID_ANY, _("Day: "));
+	m_btn_offset_d_prev = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, btn_size);
+	m_btn_offset_d_next = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, btn_size);
+
+	// グリッドに追加（順番に埋まっていく）
+	offset_grid->Add(label_y, 0, wxALIGN_CENTER_VERTICAL);
+	offset_grid->Add(m_btn_offset_y_prev);
+	offset_grid->Add(m_btn_offset_y_next);
+
+	offset_grid->Add(label_m, 0, wxALIGN_CENTER_VERTICAL);
+	offset_grid->Add(m_btn_offset_m_prev);
+	offset_grid->Add(m_btn_offset_m_next);
+
+	offset_grid->Add(label_d, 0, wxALIGN_CENTER_VERTICAL);
+	offset_grid->Add(m_btn_offset_d_prev);
+	offset_grid->Add(m_btn_offset_d_next);
+
+	sizer->Add(offset_grid, 0, wxALL, 10);
+	
 	this->SetSizer(sizer);
 
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
