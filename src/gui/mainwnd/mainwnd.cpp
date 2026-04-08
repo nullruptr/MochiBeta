@@ -1,3 +1,4 @@
+#include <wx/event.h>
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
@@ -9,8 +10,9 @@
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
-	wxDefaultPosition, wxSize(800,600),
+	wxDefaultPosition, wxSize(1400,1200),
 	wxDEFAULT_FRAME_STYLE) {
+	// wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
         // notify wxAUI which frame to use
         m_mgr.SetManagedWindow(this);
 
@@ -36,14 +38,16 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
+	// 発火イベント受信用
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnStartRecordToRecWnd, this, ID_START_RECORDING);
 
 	// Dashboard
 	m_dashboard = new Dashboard(this, db);
 	// Clock パネルの生成
 	m_clock = new Clock(this);
 	// Recording
-	m_recording = new Recording(this);
+	m_recording = new Recording(this, db);
 	// TreeCtrl
 	m_categoryTree = new CategoryTree(this, db);
 
@@ -65,7 +69,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Bottom()
         .Caption(_("Recording"))
         .Name(wxT("Recording_wnd"))
-        .BestSize(250, 250)
+        .BestSize(500, 500)
         .Layer(0)
 	.Position(0)
 	.PaneBorder(true)
@@ -162,6 +166,14 @@ void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 	// Dashboard の表示を更新
 	if (m_dashboard) {
 		m_dashboard->UpdateSelectedCategory(catId, catName);
+	}
+}
+
+void Mainwnd::OnStartRecordToRecWnd(wxCommandEvent& event) {
+	int catId = event.GetInt();
+	wxString catName = event.GetString();
+	if (m_recording) {
+		m_recording->OnStartRecord(catId, catName);
 	}
 }
 

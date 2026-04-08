@@ -1,4 +1,5 @@
 #include "dashboard.hpp"
+#include "gui/mainwnd/mainwnd.hpp"
 #include <wx/datetime.h>
 #include <wx/event.h>
 #include <wx/gdicmn.h>
@@ -150,6 +151,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	this->SetSizer(sizer);
 
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
+	m_btn_start->Bind(wxEVT_BUTTON, &Dashboard::OnStartRecordEvtSend, this);
 	
 	// 初回起動時に期間を表示させるためのダミーイベント
 	wxCommandEvent dummy;
@@ -229,7 +231,23 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	this->GetSizer()->Layout();
 }
 
-void Dashboard::UpdateSelectedCategory(long long id, const wxString& name) {
+void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
+	wxCommandEvent evt_start(wxEVT_MENU, ID_START_RECORDING);
+
+	if (m_selected_id == -1) {
+		wxMessageBox(_("Please select a category first."), _("Error"), wxOK | wxICON_ERROR);
+		return;
+	}
+	// イベントの発生源を自分に設定
+	evt_start.SetInt(m_selected_id);
+	evt_start.SetEventObject(this);
+	evt_start.SetString(m_text_cat_name->GetValue());
+	// 親ウィンドウへ向かってイベントを投げる
+	wxPostEvent(GetParent(), evt_start);
+}
+
+void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
+	m_selected_id = id; // ほかに引き渡す用途
 	m_label_ID_num->SetLabel(wxString::Format("%d", id));
 	m_text_cat_name->SetValue(name);
 

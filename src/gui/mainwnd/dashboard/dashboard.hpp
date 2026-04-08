@@ -8,7 +8,8 @@ class Dashboard : public wxPanel {
 public:
 	Dashboard(wxWindow* parent, Database& db);
 	void OnRangeChanged(wxCommandEvent& event);
-	void UpdateSelectedCategory(long long id, const wxString& name);
+	void OnStartRecordEvtSend(wxCommandEvent& event);
+	void UpdateSelectedCategory(int id, const wxString& name);
 private:
 	Database &m_db;
 	wxStaticText* m_label_ID_num;
@@ -26,6 +27,8 @@ private:
 	wxButton *m_btn_offset_m_next;
 	wxButton *m_btn_offset_d_prev;
 	wxButton *m_btn_offset_d_next;
+
+	int m_selected_id = -1; // 受け取ったIDを int で格納しておく
 };
 
 enum RangeIndex {

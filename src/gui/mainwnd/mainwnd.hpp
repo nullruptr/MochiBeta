@@ -13,7 +13,8 @@ enum {
 	ID_SETTINGS, //設定ウィンドウ
 	ID_TIME_LOG, //時間記録画面
 	ID_ACTIVITY_REPORT, // 実績照会ウィンドウ表示
-	ID_CATEGORY_SELECTED = wxID_HIGHEST + 1 // TreeCtrl からの情報受取
+	ID_CATEGORY_SELECTED = wxID_HIGHEST + 1, // TreeCtrl からの情報受取
+	ID_START_RECORDING // レコード開始イベント監視
 };
 
 class Mainwnd : public wxFrame {
@@ -26,7 +27,8 @@ Mainwnd(wxWindow* parent);
 	Database db;
 	wxString current_DB_Path;
 	void OnActivityReport(wxCommandEvent& event);
-	void OnCategorySelected(wxCommandEvent& event);
+	void OnCategorySelected(wxCommandEvent& event); // Dashboard のID と CatName の表示更新。Dashboardに渡す
+	void OnStartRecordToRecWnd(wxCommandEvent& event);
 
 	
 	
