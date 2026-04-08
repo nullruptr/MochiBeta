@@ -8,8 +8,10 @@ class Dashboard : public wxPanel {
 public:
 	Dashboard(wxWindow* parent, Database& db);
 	void OnRangeChanged(wxCommandEvent& event);
+	void UpdateSelectedCategory(long long id, const wxString& name);
 private:
 	Database &m_db;
+	wxStaticText* m_label_ID_num;
 	wxChoice *m_date_range;
 	wxTextCtrl* m_text_cat_name;
 	wxStaticText* m_period_display;

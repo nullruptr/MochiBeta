@@ -1,8 +1,36 @@
+#include <wx/treebase.h>
 #include <wx/wx.h>
 #include "gui/mainwnd/mainwnd.hpp"
 #include "treectrl.hpp"
 #include "gui/time_log/tree_item_data.hpp"
 #include "core/db/database.hpp"
+
+CategoryTree::CategoryTree(wxWindow* parent, Database &dbRef) 
+	: wxTreeCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+			wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT) ,
+	m_db(dbRef) 
+	{
+		AddRoot(_("No Database Connected"));
+		Bind(wxEVT_TREE_SEL_CHANGED, &CategoryTree::OnItemSelected, this);
+}
+
+void CategoryTree::OnItemSelected(wxTreeEvent& event) {
+	// クリックされたツリーの項目のwxTreeItemId を取得
+	wxTreeItemId item = event.GetItem();
+	if (!item.IsOk()) return;
+	
+	// 紐づけたツリーのID を取得
+	TreeItemData* data = static_cast<TreeItemData*>(GetItemData(item));
+	if (data) {
+		wxCommandEvent evt(wxEVT_MENU, ID_CATEGORY_SELECTED);
+		evt.SetInt(data->GetId());            // カテゴリIDを格納
+		evt.SetString(GetItemText(item));     // カテゴリ名を格納
+	        // イベントの発生源を自分に設定
+		evt.SetEventObject(this);
+		// 親ウィンドウへ向かってイベントを投げる
+		GetParent()->GetEventHandler()->ProcessEvent(evt);
+	}
+}
 
 void CategoryTree::UpdateTreeData() {
 
@@ -33,10 +61,3 @@ void CategoryTree::BuildTree(
 	}
 }
 
-CategoryTree::CategoryTree(wxWindow* parent, Database &dbRef) 
-	: wxTreeCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-			wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT) ,
-	m_db(dbRef) 
-	{
-		AddRoot(_("No Database Connected"));
-}

@@ -6,6 +6,7 @@
 class CategoryTree : public wxTreeCtrl {
 public:
 	CategoryTree(wxWindow* parent, Database& db);
+	void OnItemSelected(wxTreeEvent& event);
 	void UpdateTreeData();
 	void BuildTree(
 			int parentId,

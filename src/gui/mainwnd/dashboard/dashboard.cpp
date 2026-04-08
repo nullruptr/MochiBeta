@@ -16,7 +16,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxFlexGridSizer* info_grid = new wxFlexGridSizer(3, 2, 5, 5);
 
 	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
-	wxStaticText* label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
+	m_label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
 	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
 
 	// FlexGridSizer に TextCtrl と Button を1マスに同時に格納する為にまとめるためのサイザ
@@ -33,7 +33,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 
 	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(m_label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(cat_input_sizer, 1, wxEXPAND); // サブサイザーを2列目に入れる
 	info_grid->Add(label_record, 0, wxALIGN_CENTER_VERTICAL);
@@ -227,4 +227,12 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	m_period_display->SetLabel(start.FormatISODate() + " - " + end.FormatISODate());
 
 	this->GetSizer()->Layout();
+}
+
+void Dashboard::UpdateSelectedCategory(long long id, const wxString& name) {
+	m_label_ID_num->SetLabel(wxString::Format("%d", id));
+	m_text_cat_name->SetValue(name);
+
+	// レイアウト崩れ防止
+	this->Layout();
 }

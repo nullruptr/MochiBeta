@@ -36,6 +36,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
+
 	// Dashboard
 	m_dashboard = new Dashboard(this, db);
 	// Clock パネルの生成
@@ -150,6 +152,17 @@ void Mainwnd::OnActivityReport(wxCommandEvent& event) {
 	}
 	ActivityReport* report = new ActivityReport(this, db);
 	report->Show(true);
+}
+
+void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
+	// イベントに格納された数値を引っ張り出す
+	int catId = event.GetInt();
+	wxString catName = event.GetString();
+
+	// Dashboard の表示を更新
+	if (m_dashboard) {
+		m_dashboard->UpdateSelectedCategory(catId, catName);
+	}
 }
 
 Mainwnd::~Mainwnd(){
