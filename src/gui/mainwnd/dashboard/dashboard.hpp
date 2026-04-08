@@ -16,6 +16,7 @@ private:
 	wxButton *m_btn_save;
 	wxDatePickerCtrl* m_date_picker_start;
 	wxDatePickerCtrl* m_date_picker_end;
+	wxButton *m_btn_start;
 	wxButton *m_btn_update;
 	wxButton *m_btn_offset_y_prev;
 	wxButton *m_btn_offset_y_next;

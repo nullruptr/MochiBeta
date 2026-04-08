@@ -13,7 +13,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	// --- info ---
-	wxFlexGridSizer* info_grid = new wxFlexGridSizer(2, 2, 5, 5);
+	wxFlexGridSizer* info_grid = new wxFlexGridSizer(3, 2, 5, 5);
 
 	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
 	wxStaticText* label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
@@ -28,10 +28,16 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	cat_input_sizer->Add(m_text_cat_name, 1, wxEXPAND | wxRIGHT, 5);
 	cat_input_sizer->Add(m_btn_save, 0, wxALIGN_CENTER_VERTICAL);
 
+	wxStaticText* label_record = new wxStaticText(this, wxID_ANY, _("Record"));
+	m_btn_start = new wxButton(this, wxID_ANY, _("Start"));
+
+
 	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(cat_input_sizer, 1, wxEXPAND); // サブサイザーを2列目に入れる
+	info_grid->Add(label_record, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL);
 	
 	sizer->Add(info_grid, 0, wxEXPAND | wxALL, 10);
 
