@@ -1,3 +1,4 @@
+#include <wx/event.h>
 #include <wx/treebase.h>
 #include <wx/wx.h>
 #include "gui/mainwnd/mainwnd.hpp"
@@ -28,7 +29,7 @@ void CategoryTree::OnItemSelected(wxTreeEvent& event) {
 	        // イベントの発生源を自分に設定
 		evt.SetEventObject(this);
 		// 親ウィンドウへ向かってイベントを投げる
-		GetParent()->GetEventHandler()->ProcessEvent(evt);
+		wxPostEvent(GetParent(), evt);
 	}
 }
 
