@@ -28,6 +28,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	cat_input_sizer->Add(m_text_cat_name, 1, wxEXPAND | wxRIGHT, 5);
 	cat_input_sizer->Add(m_btn_save, 0, wxALIGN_CENTER_VERTICAL);
+	// 結合終わり
 
 	wxStaticText* label_record = new wxStaticText(this, wxID_ANY, _("Record"));
 	m_btn_start = new wxButton(this, wxID_ANY, _("Start"));

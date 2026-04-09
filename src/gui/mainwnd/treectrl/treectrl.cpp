@@ -12,7 +12,8 @@ CategoryTree::CategoryTree(wxWindow* parent, Database &dbRef)
 	m_db(dbRef) 
 	{
 		AddRoot(_("No Database Connected"));
-		Bind(wxEVT_TREE_SEL_CHANGED, &CategoryTree::OnItemSelected, this);
+		Bind(wxEVT_TREE_SEL_CHANGED, &CategoryTree::OnItemSelected, this); // アイテム選択時処理
+		Bind(wxEVT_CHAR_HOOK, &CategoryTree::OnUpdateKeyDown, this); // F5 入力時
 }
 
 void CategoryTree::OnItemSelected(wxTreeEvent& event) {
@@ -31,6 +32,14 @@ void CategoryTree::OnItemSelected(wxTreeEvent& event) {
 		// 親ウィンドウへ向かってイベントを投げる
 		wxPostEvent(GetParent(), evt);
 	}
+}
+
+void CategoryTree::OnUpdateKeyDown(wxKeyEvent& event) { // F5 でアップデート
+	if (event.GetKeyCode() == WXK_F5) {
+		UpdateTreeData();
+		return;
+	}
+	event.Skip();
 }
 
 void CategoryTree::UpdateTreeData() {

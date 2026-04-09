@@ -33,10 +33,12 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	menuBar->Append(menuLegacy, _("Legacy"));
 	SetMenuBar(menuBar);
 
+	// メニューバインド
 	Bind(wxEVT_MENU, &Mainwnd::OnConnectDB, this, ID_CONNECT_DB);
 	Bind(wxEVT_MENU, &Mainwnd::OnQuit, this, wxID_EXIT);
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
+
 
 	// 発火イベント受信用
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
@@ -95,7 +97,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	wxAcceleratorEntry entry;
 	entry.Set(wxACCEL_NORMAL, WXK_F12, wxID_EXIT);
 	SetAcceleratorTable(wxAcceleratorTable(1, &entry));
-
+	
 	CenterOnScreen(); // 画面真ん中に表示
 	
         // tell the manager to "commit" all the changes just made
