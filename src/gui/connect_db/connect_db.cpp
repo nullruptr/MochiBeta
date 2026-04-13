@@ -1,5 +1,6 @@
 #include "gui/connect_db/connect_db.hpp"
 #include "core/db/database.hpp"
+#include <wx/event.h>
 #include <wx/filedlg.h>
 #include <wx/wx.h>
 
@@ -54,6 +55,9 @@ void ConnectDB::OnBrowse(wxCommandEvent& event)
 	if (openFileDialog.ShowModal() == wxID_OK) 
 	{
 		dbPathInput->SetValue(openFileDialog.GetPath()); // TextCtrl にこれを戻す
+		// TextCtrl にテキストセットしたら、接続イベント実行
+		wxCommandEvent evt_onconnect;
+		OnConnect(evt_onconnect);
 	}
 }
 
