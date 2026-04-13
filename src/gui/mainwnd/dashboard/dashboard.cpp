@@ -125,7 +125,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(5, 2, 8, 20);
 	
 	wxStaticText* stat_total_time = new wxStaticText(this, wxID_ANY, _("Total Time:"));
-	wxStaticText* result_total_time = new wxStaticText(this, wxID_ANY, _("0h 0m 0s"));
+	m_result_total_time = new wxStaticText(this, wxID_ANY, _("0h 0m 0s"));
 	wxStaticText* stat_streak = new wxStaticText(this, wxID_ANY, _("Current Streak:"));
 	wxStaticText* result_streak = new wxStaticText(this, wxID_ANY, _("0d"));
 	wxStaticText* stat_last_run = new wxStaticText(this, wxID_ANY, _("Last Executed:"));
@@ -136,7 +136,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxStaticText* result_daily_average = new wxStaticText(this, wxID_ANY, _("0h 0m 0s"));
 
 	stat_grid->Add(stat_total_time, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(result_total_time, 0, wxALIGN_CENTER_VERTICAL);
+	stat_grid->Add(m_result_total_time, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_streak, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(result_streak, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_last_run, 0, wxALIGN_CENTER_VERTICAL);
@@ -153,6 +153,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
 	m_btn_start->Bind(wxEVT_BUTTON, &Dashboard::OnStartRecordEvtSend, this);
+	m_btn_update->Bind(wxEVT_BUTTON, &Dashboard::OnUpdateStatistics, this);
 	
 	// 初回起動時に期間を表示させるためのダミーイベント
 	wxCommandEvent dummy;
@@ -215,11 +216,18 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 			m_date_picker_start->Show();
 			m_date_picker_end->Show();
 			this->GetSizer()->Layout();
+			// 安全のため初期化
+			start.ResetTime();
+			end.SetHour(23).SetMinute(59).SetSecond(59);
 			return;
 
 		default:
 			return;
 	}
+
+	// 時刻情報をメンバ変数に渡す。Update でこれを利用する。
+	m_current_start = start;
+	m_current_end = end;
 
 	// Custom 以外の場合の共通処理
 	m_date_picker_start->Hide();
@@ -232,6 +240,7 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	this->GetSizer()->Layout();
 }
 
+// 記録開始イベント送信
 void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
 	wxCommandEvent evt_start(wxEVT_MENU, ID_START_RECORDING);
 
@@ -247,6 +256,7 @@ void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
 	wxPostEvent(GetParent(), evt_start);
 }
 
+// 上部 info 更新
 void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 	m_selected_id = id; // ほかに引き渡す用途
 	m_label_ID_num->SetLabel(wxString::Format("%d", id));
@@ -254,4 +264,31 @@ void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 
 	// レイアウト崩れ防止
 	this->Layout();
+}
+
+void Dashboard::OnUpdateStatistics(wxCommandEvent& event) {
+	if (m_selected_id == -1) return;
+
+	// RANGE_CUSTOM の場合、ボタンを押した瞬間の Picker の値を再取得する
+	if (m_date_range->GetSelection() == RANGE_CUSTOM) {
+		m_current_start = m_date_picker_start->GetValue();
+		m_current_end = m_date_picker_end->GetValue();
+		m_current_start.ResetTime();
+		m_current_end.SetHour(23).SetMinute(59).SetSecond(59);
+	}
+
+	// 指定された時刻をDBに渡せるようstd::string へ
+	std::string start_utc = m_current_start.ToUTC().Format("%Y-%m-%d %H:%M:%S").ToStdString();
+	std::string end_utc = m_current_end.ToUTC().Format("%Y-%m-%d %H:%M:%S").ToStdString();
+
+	// DBへ
+	long long total_sec = m_db.GetTotalTime(m_selected_id, start_utc, end_utc);
+
+	// 時間表示の整形と反映
+	long long h = total_sec / 3600;
+	long long m = (total_sec % 3600) / 60;
+	long long s = total_sec % 60;
+
+	// 表示
+	m_result_total_time->SetLabel(wxString::Format("%lldh %lldm %llds", h, m, s));
 }

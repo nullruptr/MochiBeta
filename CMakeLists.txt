@@ -24,6 +24,7 @@ set(SOURCES
 	src/core/clock/now_wxstring.cpp
 	src/core/db/database.cpp
 	src/core/db/db_record.cpp
+	src/core/db/db_total.cpp
 	src/gui/activity_report/activity_report.cpp
 	src/gui/connect_db/connect_db.cpp
 	src/gui/mainwnd/clock/clock.cpp

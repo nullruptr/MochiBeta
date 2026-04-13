@@ -39,6 +39,8 @@ public:
 	// --- db_record.cpp ---
 	long long StartRecord(int category_id);
 	bool EndRecord(int record_id);
+	// --- db_total.cpp ---
+	long long int GetTotalTime(int category_id, const std::string& start_utc, const std::string& end_utc);
 
 private:
 	sqlite3* db;
