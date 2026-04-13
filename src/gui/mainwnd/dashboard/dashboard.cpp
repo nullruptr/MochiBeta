@@ -169,11 +169,11 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	
 	// 時刻を00:00:00にリセットして日付ベースの計算に
 	start.ResetTime();
-	end.SetHour(23).SetMinute(59).SetSecond(59);
+	// end は「翌日の00:00:00」
+	end = start + wxDateSpan(0, 0, 1, 0); // +1日
 
 	switch (selIdx) {
 		case RANGE_TODAY:
-			start = now; // (規定)
 			break;
 
 		case RANGE_THIS_WEEK:
@@ -218,7 +218,8 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 			this->GetSizer()->Layout();
 			// 安全のため初期化
 			start.ResetTime();
-			end.SetHour(23).SetMinute(59).SetSecond(59);
+			end.ResetTime();
+			end = start + wxDateSpan(0, 0, 1, 0);
 			return;
 
 		default:
@@ -234,8 +235,10 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	m_date_picker_end->Hide();
 	m_period_display->Show();
 
+
+	wxDateTime display_end = end - wxDateSpan(0, 0, 1, 0);
 	// 表示形式の整形 (例: 2026-04-06)
-	m_period_display->SetLabel(start.FormatISODate() + " - " + end.FormatISODate());
+	m_period_display->SetLabel(start.FormatISODate() + " - " + display_end.FormatISODate());
 
 	this->GetSizer()->Layout();
 }
@@ -274,7 +277,7 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event) {
 		m_current_start = m_date_picker_start->GetValue();
 		m_current_end = m_date_picker_end->GetValue();
 		m_current_start.ResetTime();
-		m_current_end.SetHour(23).SetMinute(59).SetSecond(59);
+		m_current_end += wxDateSpan(0, 0, 1, 0);
 	}
 
 	// 指定された時刻をDBに渡せるようstd::string へ
