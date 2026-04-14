@@ -6,7 +6,7 @@
 #include "gui/mainwnd/dashboard/dashboard.hpp"
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
-#include "gui/activity_report/activity_report.hpp"
+#include "gui/mainwnd/activity_report/activity_report.hpp"
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),

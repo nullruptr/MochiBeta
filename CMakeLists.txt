@@ -25,8 +25,8 @@ set(SOURCES
 	src/core/db/database.cpp
 	src/core/db/db_record.cpp
 	src/core/db/db_total.cpp
-	src/gui/activity_report/activity_report.cpp
 	src/gui/connect_db/connect_db.cpp
+	src/gui/mainwnd/activity_report/activity_report.cpp
 	src/gui/mainwnd/clock/clock.cpp
 	src/gui/mainwnd/dashboard/dashboard.cpp
 	src/gui/mainwnd/recording/recording.cpp
