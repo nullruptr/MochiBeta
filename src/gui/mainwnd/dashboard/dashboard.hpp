@@ -12,6 +12,7 @@ public:
 	void OnStartRecordEvtSend(wxCommandEvent& event);
 	void UpdateSelectedCategory(int id, const wxString& name);
 	void OnUpdateStatistics(wxCommandEvent& event);
+	void GetCurrentRange(wxDateTime& start, wxDateTime& end) const;
 private:
 	Database &m_db;
 	wxStaticText* m_label_ID_num;

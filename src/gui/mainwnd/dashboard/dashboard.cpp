@@ -261,6 +261,11 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	if (m_cb_auto_update->GetValue()) {
 		wxCommandEvent evt_update;
 		OnUpdateStatistics(evt_update);
+
+		// activity report 更新イベントを投げる
+		wxCommandEvent evt_activity_report(wxEVT_MENU, ID_ACTIVITY_REPORT);
+		evt_activity_report.SetEventObject(this);
+		wxPostEvent(GetParent(), evt_activity_report);
 	}
 
 	this->GetSizer()->Layout();
@@ -322,4 +327,10 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event) {
 
 	// 表示
 	m_result_total_time->SetLabel(wxString::Format("%lldh %lldm %llds", h, m, s));
+}
+
+// MainWnd から期間を取得するためのゲッタ
+void Dashboard::GetCurrentRange(wxDateTime& start, wxDateTime& end) const {
+	start = m_current_start;
+	end = m_current_end;
 }

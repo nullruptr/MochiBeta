@@ -36,6 +36,9 @@ public:
 
 	void Close(); // DB クローズ処理
 	
+	// --- db_activity_report.cpp ---
+	
+std::vector<Database::RecordSummary> GetRecordsByRange(const std::string& start_utc, const std::string& end_utc);
 	// --- db_record.cpp ---
 	long long StartRecord(int category_id);
 	bool EndRecord(int record_id);

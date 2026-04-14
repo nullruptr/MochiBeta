@@ -3,10 +3,10 @@
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
 #include "mainwnd.hpp"
+#include "gui/mainwnd/activity_report/activity_report.hpp"
 #include "gui/mainwnd/dashboard/dashboard.hpp"
 #include "gui/time_log/time_log.hpp"
 #include "gui/connect_db/connect_db.hpp"
-#include "gui/mainwnd/activity_report/activity_report.hpp"
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
@@ -25,7 +25,6 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 
 	wxMenu *menuLegacy = new wxMenu;
 	menuLegacy->Append(ID_TIME_LOG, _("Time Log"));
-	menuLegacy->Append(ID_ACTIVITY_REPORT, _("Activity Report"));
 
 	// メニューバーの設定
 	wxMenuBar *menuBar = new wxMenuBar;
@@ -37,12 +36,12 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnConnectDB, this, ID_CONNECT_DB);
 	Bind(wxEVT_MENU, &Mainwnd::OnQuit, this, wxID_EXIT);
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
-	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
 	// 発火イベント受信用
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnStartRecordToRecWnd, this, ID_START_RECORDING);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_UPDATE_STATISTICS);
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_ACTIVITY_REPORT);
 
 	// Dashboard
 	m_dashboard = new Dashboard(this, db);
@@ -52,6 +51,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	m_recording = new Recording(this, db);
 	// TreeCtrl
 	m_categoryTree = new CategoryTree(this, db);
+	// Activity Report
+	m_activity_report = new ActivityReport(this, db);
 
 	m_mgr.AddPane(m_dashboard, wxAuiPaneInfo().CenterPane());
 
@@ -82,6 +83,15 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Left()
         .Caption(_("Categories"))
         .Name(wxT("treePane"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.CloseButton(false) // 閉じるボタン無効
+	); 
+
+	m_mgr.AddPane(m_activity_report, wxAuiPaneInfo()
+        .Right()
+        .Caption(_("Activity Report"))
+        .Name(wxT("Activity Report"))
         .BestSize(250, -1)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
@@ -150,16 +160,6 @@ void Mainwnd::OnConnectDB(wxCommandEvent& event){
 	}
 }
 
-void Mainwnd::OnActivityReport(wxCommandEvent& event) {
-	if (current_DB_Path.IsEmpty()) {
-		wxMessageBox(_("Unable to connect database"),
-			     "DB Error", wxOK | wxICON_ERROR, this);
-		return;
-	}
-	ActivityReport* report = new ActivityReport(this, db);
-	report->Show(true);
-}
-
 // --- 以下イベント転送 ---
 
 void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
@@ -170,6 +170,10 @@ void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 	// Dashboard の表示を更新
 	if (m_dashboard) {
 		m_dashboard->UpdateSelectedCategory(catId, catName);
+	}
+	if (m_activity_report) {
+		wxCommandEvent dummy;
+		OnActivityReportEvt(dummy);
 	}
 }
 
@@ -185,6 +189,20 @@ void Mainwnd::OnRecordUpdate(wxCommandEvent& event) {
 	if (m_dashboard) {
 		wxCommandEvent dummy;
 		m_dashboard->OnUpdateStatistics(dummy);
+	}
+	if (m_activity_report) {
+		wxCommandEvent dummy;
+		OnActivityReportEvt(dummy);
+	}
+}
+
+void Mainwnd::OnActivityReportEvt (wxCommandEvent& event){
+	if (m_activity_report) {
+		wxDateTime start, end;
+		// 参照渡しで Dashboard の時刻を取得
+		m_dashboard->GetCurrentRange(start, end);
+		// 変数を書き換えて、送付
+		m_activity_report->SetPeriodAndRefresh(start, end);
 	}
 }
 

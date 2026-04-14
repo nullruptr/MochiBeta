@@ -5,16 +5,17 @@
 #include <wx/dateevt.h>
 #include "core/db/database.hpp"
 
-class ActivityReport : public wxFrame {
+class ActivityReport : public wxPanel {
 public:
     ActivityReport(wxWindow* parent, Database& dbRef);
+    void SetPeriodAndRefresh(const wxDateTime& start, const wxDateTime& end);
 
 private:
-    void LoadReport();
-    void OnDateChanged(wxDateEvent& event);
+	void LoadReport();
 
-    Database& db;
-    wxDatePickerCtrl* m_datePicker;
-    wxListCtrl* m_list;
-    wxStaticText* m_total_label;
+	Database& m_db;
+	wxListCtrl* m_list;
+	wxStaticText* m_total_label;
+	wxDateTime m_current_start;
+	wxDateTime m_current_end;
 };

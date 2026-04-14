@@ -7,6 +7,7 @@
 #include "gui/mainwnd/clock/clock.hpp"
 #include "gui/mainwnd/recording/recording.hpp"
 #include "gui/mainwnd/dashboard/dashboard.hpp"
+#include "gui/mainwnd/activity_report/activity_report.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -27,18 +28,18 @@ Mainwnd(wxWindow* parent);
 	void OnConnectDB(wxCommandEvent &event);
 	Database db;
 	wxString current_DB_Path;
-	void OnActivityReport(wxCommandEvent& event);
 	void OnCategorySelected(wxCommandEvent& event); // Dashboard のID と CatName の表示更新。Dashboardに渡す
 	void OnStartRecordToRecWnd(wxCommandEvent& event);
 	void OnRecordUpdate(wxCommandEvent& event);
+	void OnActivityReportEvt(wxCommandEvent& event);
 
-	
-	
 virtual ~Mainwnd();
+
 private:
 	wxAuiManager m_mgr;
 	CategoryTree* m_categoryTree;
 	Clock* m_clock;
 	Recording* m_recording;
 	Dashboard* m_dashboard;
+	ActivityReport* m_activity_report;
 };
