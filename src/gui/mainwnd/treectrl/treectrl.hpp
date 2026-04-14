@@ -3,6 +3,8 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 #include "core/db/database.hpp"
+#include "gui/time_log/edit_category.hpp"
+#include "gui/time_log/edit_parent_id.hpp"
 
 class CategoryTree : public wxTreeCtrl {
 public:
@@ -15,6 +17,18 @@ public:
 			wxTreeItemId parentNode,
 			const std::vector<Database::Category> &categories
 		      );
+	void OnCreateNewCategory(wxCommandEvent& event);
+	void OnEditParentId(wxCommandEvent& event); // parent id の編集
+	void OnEditItem(wxCommandEvent& event);
+	void OnDeleteItem(wxCommandEvent& event); // イベント削除
+	void OnContextMenu(wxContextMenuEvent& event);
 private:
 	Database& m_db;
+	wxTreeItemId m_context_item;
+};
+
+enum{
+	ID_TREE_EDIT,
+	ID_CREATE,
+	ID_MOVE
 };

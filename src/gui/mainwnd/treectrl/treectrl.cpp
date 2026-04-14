@@ -4,7 +4,6 @@
 #include "gui/mainwnd/mainwnd.hpp"
 #include "treectrl.hpp"
 #include "gui/time_log/tree_item_data.hpp"
-#include "core/db/database.hpp"
 
 CategoryTree::CategoryTree(wxWindow* parent, Database &dbRef) 
 	: wxTreeCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -14,6 +13,39 @@ CategoryTree::CategoryTree(wxWindow* parent, Database &dbRef)
 		AddRoot(_("No Database Connected"));
 		Bind(wxEVT_TREE_SEL_CHANGED, &CategoryTree::OnItemSelected, this); // アイテム選択時処理
 		Bind(wxEVT_CHAR_HOOK, &CategoryTree::OnUpdateKeyDown, this); // F5 入力時
+
+	// コンテキストメニュー（右クリック）イベントをBind
+	Bind(wxEVT_CONTEXT_MENU, &CategoryTree::OnContextMenu, this);
+
+	// メニュー項目に対する処理の Bind
+	Bind(
+		wxEVT_MENU,
+		&CategoryTree::OnCreateNewCategory,
+		this,
+		ID_CREATE	
+	);
+	//wxID_MENUのメニューにおいて、wxID_EDITが呼ばれたら、CategoryTree::OnEditItemを呼び出すよう指示。
+
+	Bind(
+		wxEVT_MENU,
+		&CategoryTree::OnEditItem,
+		this,
+		wxID_EDIT
+	);
+
+	Bind(
+		wxEVT_MENU,
+		&CategoryTree::OnEditParentId,
+		this,
+		ID_MOVE
+	);
+
+	Bind(
+		wxEVT_MENU,
+		&CategoryTree::OnDeleteItem,
+		this,
+		wxID_DELETE
+	);
 }
 
 void CategoryTree::OnItemSelected(wxTreeEvent& event) {
@@ -71,3 +103,139 @@ void CategoryTree::BuildTree(
 	}
 }
 
+void CategoryTree::OnCreateNewCategory(wxCommandEvent &event){
+	// 現在選択されているアイテムを取得
+	wxTreeItemId parent = GetSelection();
+
+	// 無効な場合は処理しない
+	if (!parent.IsOk()){
+		return;
+	}
+
+	int parent_db_id = 0;
+	if (parent.IsOk()){
+		TreeItemData* parentData = (TreeItemData*)GetItemData(parent);
+		if (parentData) { // データがあるとき(nullptr出ないとき)
+			parent_db_id = parentData->GetId();
+		}
+		// parentData が nullptr (rootノード)なら、parent_db_id = 0 のまま
+	}
+	// 新規ノード名
+	wxString newCategoryName = wxT("New Category");
+
+
+	// 編集用画面呼び出し
+	EditCategory dlg(this,
+			newCategoryName,
+			m_db,
+			parent_db_id,
+			0 // 新規のため、編集ID なし
+			); // 編集用ダイアログ呼び出し
+	if (dlg.ShowModal() == wxID_OK) {
+		// 保存成功 -> ツリー再読み込み
+		UpdateTreeData();
+	}
+	
+}
+
+void CategoryTree::OnEditParentId(wxCommandEvent& event) {
+	wxTreeItemId item = GetSelection(); // 選択されたアイテム情報取得
+
+	if (!item.IsOk()) return; 
+	
+	TreeItemData* data = (TreeItemData*)GetItemData(item); 
+	if (!data) return;
+
+	int id = data->GetId();
+	wxString name = GetItemText(item);
+
+
+	EditParentId dlg(this,
+			id,
+			m_db
+			);
+
+	if (dlg.ShowModal() == wxID_OK) {
+		UpdateTreeData(); // ツリー再読み込み
+	}
+}
+
+void CategoryTree::OnEditItem(wxCommandEvent& event){
+	// ツリーでクリックされた内容を取得
+	wxTreeItemId item = GetSelection();
+
+	if (!item.IsOk()){
+		return;
+	}
+
+	TreeItemData* data = (TreeItemData*)GetItemData(item);
+
+	if(!data){
+		return;
+	}
+
+	int id = data->GetId();
+	wxString currentName = GetItemText(item);
+
+	EditCategory dlg(this,
+			currentName,
+			m_db,
+			0, // parentId は編集時不要
+			id // editId
+			);
+
+	if (dlg.ShowModal() == wxID_OK) {
+		UpdateTreeData(); // ツリー再読み込み
+	}
+}
+
+void CategoryTree::OnDeleteItem(wxCommandEvent& event){ // 削除および非表示処理
+	wxTreeItemId item = GetSelection(); // 選択されたアイテム情報取得
+
+	if (!item.IsOk()) return; 
+	
+	TreeItemData* data = (TreeItemData*)GetItemData(item); 
+	if (!data) return;
+
+	int id = data->GetId();
+	wxString name = GetItemText(item);
+
+	if (m_db.HasRecords(id)) {
+		int ans = wxMessageBox(
+				wxString::Format(_("'%s' has records.\n Are you sure you want to hide this category?"), name),
+				_("Check"),
+				wxYES_NO | wxICON_QUESTION,
+				this
+				);
+		if (ans == wxYES) {
+			m_db.HideCategory(id);
+			UpdateTreeData();
+		}
+	} else {
+		// 記録がない -> 物理削除(現状は非表示フラグをたてている)
+		int ans = wxMessageBox(
+				wxString::Format(_("Are you sure you want to delete '%s'?"), name),
+				_("Check"),
+				wxYES_NO | wxICON_WARNING,
+				this
+				);
+		if (ans == wxYES) {
+			m_db.HideCategory(id);
+			UpdateTreeData();
+		}
+	}
+
+}
+
+
+void CategoryTree::OnContextMenu(wxContextMenuEvent& event) {
+	// 右クリックメニューの作成
+	wxMenu menu;
+	menu.Append(ID_CREATE, _("Create New Category"));
+	menu.Append(wxID_EDIT, _("Edit"));
+	menu.Append(ID_MOVE, _("Move"));
+	menu.Append(wxID_DELETE, _("Delete"));
+	
+	// マウスカーソル位置にメニューを表示する
+	PopupMenu(&menu);
+}
