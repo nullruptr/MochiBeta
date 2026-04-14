@@ -2,6 +2,7 @@
 #include <wx/event.h>
 #include <wx/wx.h>
 #include <wx/datectrl.h>
+#include <wx/dateevt.h>
 #include "core/db/database.hpp"
 
 class Dashboard : public wxPanel {
@@ -22,6 +23,7 @@ private:
 	wxDatePickerCtrl* m_date_picker_end;
 	wxButton *m_btn_start;
 	wxButton *m_btn_update;
+	wxCheckBox* m_cb_auto_update;
 	wxButton *m_btn_offset_y_prev;
 	wxButton *m_btn_offset_y_next;
 	wxButton *m_btn_offset_m_prev;

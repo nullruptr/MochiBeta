@@ -73,7 +73,9 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	m_date_picker_end->Hide();
 
 	m_btn_update = new wxButton(this, wxID_ANY, _("Update"));
-
+	m_cb_auto_update = new wxCheckBox(this, wxID_ANY, _("Auto Update"));
+	// デフォルトでチェックあり
+	m_cb_auto_update->SetValue(true);
 
 	range_sizer->Add(date_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	range_sizer->Add(m_date_range, 0, wxALIGN_CENTER_VERTICAL);
@@ -81,6 +83,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	range_sizer->Add(m_date_picker_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	range_sizer->Add(m_date_picker_end, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	range_sizer->Add(m_btn_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+	range_sizer->Add(m_cb_auto_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	sizer->Add(range_sizer, 0, wxALL, 10);
 
 		// --- オフセット操作エリア ---
@@ -154,6 +157,8 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
 	m_btn_start->Bind(wxEVT_BUTTON, &Dashboard::OnStartRecordEvtSend, this);
 	m_btn_update->Bind(wxEVT_BUTTON, &Dashboard::OnUpdateStatistics, this);
+	m_date_picker_start->Bind(wxEVT_DATE_CHANGED, &Dashboard::OnUpdateStatistics, this);
+	m_date_picker_end->Bind(wxEVT_DATE_CHANGED, &Dashboard::OnUpdateStatistics, this);
 	
 	// 初回起動時に期間を表示させるためのダミーイベント
 	wxCommandEvent dummy;
@@ -220,25 +225,43 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 			start.ResetTime();
 			end.ResetTime();
 			end = start + wxDateSpan(0, 0, 1, 0);
-			return;
+			break;
 
-		default:
+			default:
 			return;
 	}
+
 
 	// 時刻情報をメンバ変数に渡す。Update でこれを利用する。
 	m_current_start = start;
 	m_current_end = end;
 
-	// Custom 以外の場合の共通処理
-	m_date_picker_start->Hide();
-	m_date_picker_end->Hide();
-	m_period_display->Show();
+
+	// custom のとき
+	if (selIdx == RANGE_CUSTOM) {
+		start = m_date_picker_start->GetValue();
+		end = m_date_picker_end->GetValue();
+
+		start.ResetTime();
+		end.ResetTime();
+		end += wxDateSpan(0, 0, 1, 0);
+	} else {
+		// Custom 以外の場合の共通処理
+		m_date_picker_start->Hide();
+		m_date_picker_end->Hide();
+		m_period_display->Show();
+	}
 
 
 	wxDateTime display_end = end - wxDateSpan(0, 0, 1, 0);
 	// 表示形式の整形 (例: 2026-04-06)
 	m_period_display->SetLabel(start.FormatISODate() + " - " + display_end.FormatISODate());
+
+	// m_cb_auto_update が true のとき
+	if (m_cb_auto_update->GetValue()) {
+		wxCommandEvent evt_update;
+		OnUpdateStatistics(evt_update);
+	}
 
 	this->GetSizer()->Layout();
 }
@@ -265,6 +288,11 @@ void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 	m_label_ID_num->SetLabel(wxString::Format("%d", id));
 	m_text_cat_name->SetValue(name);
 
+	// m_cb_auto_update が true のとき
+	if (m_cb_auto_update->GetValue()) {
+		wxCommandEvent evt_update;
+		OnUpdateStatistics(evt_update);
+	}
 	// レイアウト崩れ防止
 	this->Layout();
 }

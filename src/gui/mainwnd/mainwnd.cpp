@@ -39,10 +39,10 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 	Bind(wxEVT_MENU, &Mainwnd::OnActivityReport, this, ID_ACTIVITY_REPORT);
 
-
 	// 発火イベント受信用
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnStartRecordToRecWnd, this, ID_START_RECORDING);
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_UPDATE_STATISTICS);
 
 	// Dashboard
 	m_dashboard = new Dashboard(this, db);
@@ -160,6 +160,8 @@ void Mainwnd::OnActivityReport(wxCommandEvent& event) {
 	report->Show(true);
 }
 
+// --- 以下イベント転送 ---
+
 void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 	// イベントに格納された数値を引っ張り出す
 	int catId = event.GetInt();
@@ -176,6 +178,13 @@ void Mainwnd::OnStartRecordToRecWnd(wxCommandEvent& event) {
 	wxString catName = event.GetString();
 	if (m_recording) {
 		m_recording->OnStartRecord(catId, catName);
+	}
+}
+
+void Mainwnd::OnRecordUpdate(wxCommandEvent& event) {
+	if (m_dashboard) {
+		wxCommandEvent dummy;
+		m_dashboard->OnUpdateStatistics(dummy);
 	}
 }
 

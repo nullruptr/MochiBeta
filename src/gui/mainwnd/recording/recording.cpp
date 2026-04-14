@@ -1,5 +1,6 @@
 #include "recording.hpp"
 #include "core/db/database.hpp"
+#include "gui/mainwnd/mainwnd.hpp"
 #include <wx/dataview.h>
 #include <wx/event.h>
 #include <wx/msgdlg.h>
@@ -117,6 +118,11 @@ void Recording::OnStopRecord(wxCommandEvent& event) {
 			m_timer.Stop();
 		}
 	}
+	// 統計情報自動更新
+	// CheckBox のチェック有無は、dashboard 側で管理してる
+	wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTICS);
+	evt.SetEventObject(this);
+	wxPostEvent(GetParent(), evt);
 }
 
 void Recording::OnTimer(wxTimerEvent& event) {
