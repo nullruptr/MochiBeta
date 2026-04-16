@@ -17,11 +17,10 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
     // --- 下部: 合計表示 ---
-    m_total_label = new wxStaticText(this, wxID_ANY, _("Total: 0h 0m 0s"));
+    m_total_label = new wxStaticText(this, wxID_ANY, _("Total: 00:00:00"));
     sizer->Add(m_total_label, 0, wxALL, 10);
 
     this->SetSizer(sizer);
-
 
     CenterOnParent();
 }
@@ -43,12 +42,12 @@ void ActivityReport::LoadReport() {
 		int s = rs.total_seconds % 60;
         
 		long idx = m_list->InsertItem(m_list->GetItemCount(), wxString::FromUTF8(rs.category_name));
-		m_list->SetItem(idx, 1, wxString::Format("%dh %dm %ds", h, m, s));
+		m_list->SetItem(idx, 1, wxString::Format("%02d:%02d:%02d", h, m, s));
 		
 		total_seconds += rs.total_seconds;
 	}
 
-	m_total_label->SetLabel(wxString::Format(_("Total: %lldh %lldm %llds"), 
+	m_total_label->SetLabel(wxString::Format("Total: %02lld:%02lld:%02lld", 
         total_seconds / 3600, (total_seconds % 3600) / 60, total_seconds % 60));
 }
 
