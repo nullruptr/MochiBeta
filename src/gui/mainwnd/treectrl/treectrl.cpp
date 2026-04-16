@@ -229,6 +229,24 @@ void CategoryTree::OnDeleteItem(wxCommandEvent& event){ // 削除および非表
 
 
 void CategoryTree::OnContextMenu(wxContextMenuEvent& event) {
+
+	// 1. クリックされた位置（スクリーン座標）を取得
+	wxPoint point = event.GetPosition();
+
+	// 2. スクリーン座標をクライアント座標（ウィンドウ内の相対座標）に変換
+	if (point != wxDefaultPosition) {
+		wxPoint clientPoint = ScreenToClient(point);
+		
+		// 3. その座標にアイテムがあるか判定
+		int flags;
+		wxTreeItemId item = HitTest(clientPoint, flags);
+
+		// 4. 有効なアイテムの上であれば、それを選択状態にする
+		if (item.IsOk()) {
+		SelectItem(item);
+		}
+	}
+
 	// 右クリックメニューの作成
 	wxMenu menu;
 	menu.Append(ID_CREATE, _("Create New Category"));
