@@ -12,8 +12,8 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     m_list = new wxListCtrl(this, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
                             wxLC_REPORT | wxLC_HRULES | wxLC_VRULES);
-    m_list->InsertColumn(0, _("Category"), wxLIST_FORMAT_LEFT, 350);
-    m_list->InsertColumn(1, _("Total Time"), wxLIST_FORMAT_LEFT, 150);
+    m_list->InsertColumn(0, _("Category"), wxLIST_FORMAT_LEFT, 125);
+    m_list->InsertColumn(1, _("Total Time"), wxLIST_FORMAT_LEFT, 125);
     sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
     // --- 下部: 合計表示 ---
