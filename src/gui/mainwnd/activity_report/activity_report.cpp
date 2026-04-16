@@ -1,4 +1,5 @@
 #include "activity_report.hpp"
+#include <wx/listbase.h>
 #include <wx/wx.h>
 #include <wx/dateevt.h>
 
@@ -12,8 +13,9 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     m_list = new wxListCtrl(this, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
                             wxLC_REPORT | wxLC_HRULES | wxLC_VRULES);
-    m_list->InsertColumn(0, _("Category"), wxLIST_FORMAT_LEFT, 125);
-    m_list->InsertColumn(1, _("Total Time"), wxLIST_FORMAT_LEFT, 125);
+    m_list->InsertColumn(0, _("Category"), wxLIST_FORMAT_LEFT, 120);
+    m_list->InsertColumn(1, _("Total Time"), wxLIST_FORMAT_LEFT, 100);
+    m_list->InsertColumn(2, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, 80);
     sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
     // --- 下部: 合計表示 ---
@@ -35,16 +37,29 @@ void ActivityReport::LoadReport() {
 
 	std::vector<Database::RecordSummary> summaries = m_db.GetRecordsByRange(s_utc, e_utc);
 
+	// ず最初に秒数を計算
 	long long total_seconds = 0;
 	for (const auto& rs : summaries) {
+		total_seconds += rs.total_seconds;
+	}
+
+	for (const auto& rs : summaries) {
+		// カテゴリ名
+		long idx = m_list->InsertItem(m_list->GetItemCount(), wxString::FromUTF8(rs.category_name));
+		// 合計時間
 		int h = rs.total_seconds / 3600;
 		int m = (rs.total_seconds % 3600) / 60;
 		int s = rs.total_seconds % 60;
         
-		long idx = m_list->InsertItem(m_list->GetItemCount(), wxString::FromUTF8(rs.category_name));
 		m_list->SetItem(idx, 1, wxString::Format("%02d:%02d:%02d", h, m, s));
-		
-		total_seconds += rs.total_seconds;
+
+		// 割合
+		double ratio = 0.0;
+		if (total_seconds > 0) {
+			// (取得秒数 / 合計秒数) * 100 => 割合
+			ratio = (static_cast<double>(rs.total_seconds) / total_seconds) * 100.0;
+		}
+		m_list->SetItem(idx, 2, wxString::Format("%.1f%%", ratio));
 	}
 
 	m_total_label->SetLabel(wxString::Format("Total: %02lld:%02lld:%02lld", 

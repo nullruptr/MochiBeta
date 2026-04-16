@@ -92,7 +92,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Right()
         .Caption(_("Activity Report"))
         .Name(wxT("Activity Report"))
-        .BestSize(250, -1)
+        .BestSize(320, -1)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
 	); 
