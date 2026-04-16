@@ -31,7 +31,6 @@ Mainwnd(wxWindow* parent);
 	void OnCategorySelected(wxCommandEvent& event); // Dashboard のID と CatName の表示更新。Dashboardに渡す
 	void OnStartRecordToRecWnd(wxCommandEvent& event);
 	void OnRecordUpdate(wxCommandEvent& event);
-	void OnActivityReportEvt(wxCommandEvent& event);
 
 virtual ~Mainwnd();
 

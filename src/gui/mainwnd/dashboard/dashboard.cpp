@@ -2,7 +2,6 @@
 #include "gui/mainwnd/mainwnd.hpp"
 #include <wx/datetime.h>
 #include <wx/event.h>
-#include <wx/gdicmn.h>
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include <wx/wx.h>
@@ -156,9 +155,19 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
 	m_btn_start->Bind(wxEVT_BUTTON, &Dashboard::OnStartRecordEvtSend, this);
-	m_btn_update->Bind(wxEVT_BUTTON, &Dashboard::OnUpdateStatistics, this);
-	m_date_picker_start->Bind(wxEVT_DATE_CHANGED, &Dashboard::OnUpdateStatistics, this);
-	m_date_picker_end->Bind(wxEVT_DATE_CHANGED, &Dashboard::OnUpdateStatistics, this);
+	// dashboard.cpp のコンストラクタ内
+	// event 引数が2つ以上あるので、ラムダ式で対応
+	m_btn_update->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+		this->OnUpdateStatistics(event, EventType::FROM_MYSELF);
+	});
+
+	m_date_picker_start->Bind(wxEVT_DATE_CHANGED, [this](wxDateEvent& event) {
+		this->OnUpdateStatistics(event, EventType::FROM_MYSELF);
+	});
+
+	m_date_picker_end->Bind(wxEVT_DATE_CHANGED, [this](wxDateEvent& event) {
+		this->OnUpdateStatistics(event, EventType::FROM_MYSELF);
+	});
 	
 	// 初回起動時に期間を表示させるためのダミーイベント
 	wxCommandEvent dummy;
@@ -260,7 +269,7 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	// m_cb_auto_update が true のとき
 	if (m_cb_auto_update->GetValue()) {
 		wxCommandEvent evt_update;
-		OnUpdateStatistics(evt_update);
+		OnUpdateStatistics(evt_update, EventType::FROM_MYSELF);
 
 		// activity report 更新イベントを投げる
 		wxCommandEvent evt_activity_report(wxEVT_MENU, ID_ACTIVITY_REPORT);
@@ -296,13 +305,13 @@ void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 	// m_cb_auto_update が true のとき
 	if (m_cb_auto_update->GetValue()) {
 		wxCommandEvent evt_update;
-		OnUpdateStatistics(evt_update);
+		OnUpdateStatistics(evt_update, EventType::FROM_MYSELF);
 	}
 	// レイアウト崩れ防止
 	this->Layout();
 }
 
-void Dashboard::OnUpdateStatistics(wxCommandEvent& event) {
+void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	if (m_selected_id == -1) return;
 
 	// RANGE_CUSTOM の場合、ボタンを押した瞬間の Picker の値を再取得する
@@ -327,6 +336,14 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event) {
 
 	// 表示
 	m_result_total_time->SetLabel(wxString::Format("%lldh %lldm %llds", h, m, s));
+
+	// 表示内容更新イベント
+	// 無限ループ防止のために、MAINWND から更新処理が来たら、除外する
+	if (type == EventType::FROM_MYSELF) {
+		wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTICS);
+		evt.SetEventObject(this);
+		wxPostEvent(GetParent(), evt);
+	}
 }
 
 // MainWnd から期間を取得するためのゲッタ

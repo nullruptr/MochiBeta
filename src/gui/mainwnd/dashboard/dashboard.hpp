@@ -5,13 +5,32 @@
 #include <wx/dateevt.h>
 #include "core/db/database.hpp"
 
+enum RangeIndex {
+	RANGE_TODAY = 0,
+	RANGE_THIS_WEEK,
+	RANGE_THIS_MONTH,
+	RANGE_THIS_YEAR,
+	RANGE_LAST_1_MONTH,
+	RANGE_LAST_3_MONTHS,
+	RANGE_LAST_6_MONTHS,
+	RANGE_LAST_1_YEAR,
+	RANGE_LAST_3_YEARS,
+	RANGE_CUSTOM
+};
+
+// OnUpdateStatistics において、イベントがどこから来たかによって制御を変えるため
+enum class EventType {
+	FROM_MAINWND,
+	FROM_MYSELF
+};
+
 class Dashboard : public wxPanel {
 public:
 	Dashboard(wxWindow* parent, Database& db);
 	void OnRangeChanged(wxCommandEvent& event);
 	void OnStartRecordEvtSend(wxCommandEvent& event);
 	void UpdateSelectedCategory(int id, const wxString& name);
-	void OnUpdateStatistics(wxCommandEvent& event);
+	void OnUpdateStatistics(wxCommandEvent& event, EventType type);
 	void GetCurrentRange(wxDateTime& start, wxDateTime& end) const;
 private:
 	Database &m_db;
@@ -38,15 +57,3 @@ private:
 	int m_selected_id = -1; // 受け取ったIDを int で格納しておく
 };
 
-enum RangeIndex {
-	RANGE_TODAY = 0,
-	RANGE_THIS_WEEK,
-	RANGE_THIS_MONTH,
-	RANGE_THIS_YEAR,
-	RANGE_LAST_1_MONTH,
-	RANGE_LAST_3_MONTHS,
-	RANGE_LAST_6_MONTHS,
-	RANGE_LAST_1_YEAR,
-	RANGE_LAST_3_YEARS,
-	RANGE_CUSTOM
-};

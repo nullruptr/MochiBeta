@@ -173,7 +173,7 @@ void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 	}
 	if (m_activity_report) {
 		wxCommandEvent dummy;
-		OnActivityReportEvt(dummy);
+		OnRecordUpdate(dummy);
 	}
 }
 
@@ -185,24 +185,15 @@ void Mainwnd::OnStartRecordToRecWnd(wxCommandEvent& event) {
 	}
 }
 
-void Mainwnd::OnRecordUpdate(wxCommandEvent& event) {
+void Mainwnd::OnRecordUpdate(wxCommandEvent& event) { // 表示内容更新
+	if (m_activity_report && m_dashboard) {
+		wxDateTime start, end;
+		m_dashboard->GetCurrentRange(start, end);
+		m_activity_report->SetPeriodAndRefresh(start, end);
+	}
 	if (m_dashboard) {
 		wxCommandEvent dummy;
-		m_dashboard->OnUpdateStatistics(dummy);
-	}
-	if (m_activity_report) {
-		wxCommandEvent dummy;
-		OnActivityReportEvt(dummy);
-	}
-}
-
-void Mainwnd::OnActivityReportEvt (wxCommandEvent& event){
-	if (m_activity_report) {
-		wxDateTime start, end;
-		// 参照渡しで Dashboard の時刻を取得
-		m_dashboard->GetCurrentRange(start, end);
-		// 変数を書き換えて、送付
-		m_activity_report->SetPeriodAndRefresh(start, end);
+		m_dashboard->OnUpdateStatistics(dummy, EventType::FROM_MAINWND);
 	}
 }
 
