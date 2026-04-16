@@ -19,7 +19,7 @@ bool MBApp::OnInit() {
 	locale.AddCatalogLookupPathPrefix("locale");
 	locale.AddCatalog("mb");
 	Mainwnd *mainwnd = new Mainwnd(nullptr); 
-	mainwnd->SetTitle("MochiBeta - AUI Version"); // Build habits the sticky way
+	mainwnd->SetTitle("MochiBeta"); // Build habits the sticky way
 	mainwnd->Show(true);
 	return true;
 }
