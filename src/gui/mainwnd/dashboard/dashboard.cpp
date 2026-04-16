@@ -124,29 +124,25 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	// --- ステータス表示 ---
 	wxStaticBoxSizer* stat_box = new wxStaticBoxSizer(wxVERTICAL, this, _("Statistics"));
-	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(5, 2, 8, 20);
+	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(4, 2, 8, 20);
 	
-	wxStaticText* stat_total_time = new wxStaticText(this, wxID_ANY, _("Total Time:"));
-	m_result_total_time = new wxStaticText(this, wxID_ANY, _("0h 0m 0s"));
+	wxStaticText* stat_total_time_all = new wxStaticText(this, wxID_ANY, _("Total Time (All-time):"));
+	m_result_total_time_all = new wxStaticText(this, wxID_ANY, _("00:00:00"));
+	wxStaticText* stat_total_time_range = new wxStaticText(this, wxID_ANY, _("Total Time (Selected Range):"));
+	m_result_total_time_range = new wxStaticText(this, wxID_ANY, _("00:00:00"));
 	wxStaticText* stat_streak = new wxStaticText(this, wxID_ANY, _("Current Streak:"));
 	wxStaticText* result_streak = new wxStaticText(this, wxID_ANY, _("0d"));
 	wxStaticText* stat_last_run = new wxStaticText(this, wxID_ANY, _("Last Executed:"));
 	wxStaticText* result_last_run = new wxStaticText(this, wxID_ANY, _("0000-00-00"));
-	wxStaticText* stat_days_since = new wxStaticText(this, wxID_ANY, _("Days Since Last Run:"));
-	wxStaticText* result_days_since = new wxStaticText(this, wxID_ANY, _("0d"));
-	wxStaticText* stat_daily_average = new wxStaticText(this, wxID_ANY, _("Daily Average:"));
-	wxStaticText* result_daily_average = new wxStaticText(this, wxID_ANY, _("0h 0m 0s"));
 
-	stat_grid->Add(stat_total_time, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(m_result_total_time, 0, wxALIGN_CENTER_VERTICAL);
+	stat_grid->Add(stat_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
+	stat_grid->Add(m_result_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
+	stat_grid->Add(stat_total_time_range, 0, wxALIGN_CENTER_VERTICAL);
+	stat_grid->Add(m_result_total_time_range, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_streak, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(result_streak, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_last_run, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(result_last_run, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_days_since, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(result_days_since, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_daily_average, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(result_daily_average, 0, wxALIGN_CENTER_VERTICAL);
 	
 	stat_box->Add(stat_grid, 0, wxLEFT, 10);
 	sizer->Add(stat_box, 0, wxALL, 10);
@@ -335,7 +331,8 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	long long s = total_sec % 60;
 
 	// 表示
-	m_result_total_time->SetLabel(wxString::Format("%lldh %lldm %llds", h, m, s));
+	// 分と秒は2桁固定
+	m_result_total_time_range->SetLabel(wxString::Format("%02lld:%02lld:%02lld", h, m, s));
 
 	// 表示内容更新イベント
 	// 無限ループ防止のために、MAINWND から更新処理が来たら、除外する

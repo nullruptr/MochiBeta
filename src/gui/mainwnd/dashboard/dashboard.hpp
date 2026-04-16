@@ -50,7 +50,8 @@ private:
 	wxButton *m_btn_offset_m_next;
 	wxButton *m_btn_offset_d_prev;
 	wxButton *m_btn_offset_d_next;
-	wxStaticText* m_result_total_time;
+	wxStaticText* m_result_total_time_all;
+	wxStaticText* m_result_total_time_range;
 	wxDateTime m_current_start;
 	wxDateTime m_current_end;
 
