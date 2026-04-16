@@ -18,16 +18,8 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
 	m_label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
 	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
-
-	// FlexGridSizer に TextCtrl と Button を1マスに同時に格納する為にまとめるためのサイザ
-	// 実質セル結合
-	wxBoxSizer* cat_input_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_text_cat_name = new wxTextCtrl(this, wxID_ANY, wxEmptyString);
-	m_btn_save = new wxButton(this, wxID_ANY, _("Save"));
-
-	cat_input_sizer->Add(m_text_cat_name, 1, wxEXPAND | wxRIGHT, 5);
-	cat_input_sizer->Add(m_btn_save, 0, wxALIGN_CENTER_VERTICAL);
-	// 結合終わり
+	m_label_cat_name_result = new wxStaticText(this, wxID_ANY, _("None"));
+	
 
 	wxStaticText* label_record = new wxStaticText(this, wxID_ANY, _("Record"));
 	m_btn_start = new wxButton(this, wxID_ANY, _("Start"));
@@ -36,7 +28,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(m_label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(cat_input_sizer, 1, wxEXPAND); // サブサイザーを2列目に入れる
+	info_grid->Add(m_label_cat_name_result, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_record, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL);
 	
@@ -287,7 +279,7 @@ void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
 	// イベントの発生源を自分に設定
 	evt_start.SetInt(m_selected_id);
 	evt_start.SetEventObject(this);
-	evt_start.SetString(m_text_cat_name->GetValue());
+	evt_start.SetString(m_label_cat_name_result->GetLabelText());
 	// 親ウィンドウへ向かってイベントを投げる
 	wxPostEvent(GetParent(), evt_start);
 }
@@ -296,7 +288,7 @@ void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
 void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 	m_selected_id = id; // ほかに引き渡す用途
 	m_label_ID_num->SetLabel(wxString::Format("%d", id));
-	m_text_cat_name->SetValue(name);
+	m_label_cat_name_result->SetLabel(name);
 
 	// m_cb_auto_update が true のとき
 	if (m_cb_auto_update->GetValue()) {
