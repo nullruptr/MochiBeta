@@ -36,6 +36,7 @@ private:
 	Database &m_db;
 	wxStaticText* m_label_ID_num;
 	wxStaticText* m_label_cat_name_result;
+	wxStaticText* m_label_path;
 	wxChoice *m_date_range;
 	wxStaticText* m_period_display;
 	wxDatePickerCtrl* m_date_picker_start;

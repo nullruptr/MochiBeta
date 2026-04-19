@@ -3,6 +3,7 @@
 #include <wx/datetime.h>
 #include <wx/event.h>
 #include <wx/sizer.h>
+#include <wx/string.h>
 #include <wx/textctrl.h>
 #include <wx/wx.h>
 
@@ -13,22 +14,23 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	// --- info ---
-	wxFlexGridSizer* info_grid = new wxFlexGridSizer(3, 2, 5, 5);
+	wxFlexGridSizer* info_grid = new wxFlexGridSizer(4, 2, 5, 5);
 
 	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
 	m_label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
 	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
 	m_label_cat_name_result = new wxStaticText(this, wxID_ANY, _("None"));
-	
-
+	wxStaticText* label_path = new wxStaticText(this, wxID_ANY, _("Path:"));
+	m_label_path = new wxStaticText(this, wxID_ANY, _("None"));
 	wxStaticText* label_record = new wxStaticText(this, wxID_ANY, _("Record"));
 	m_btn_start = new wxButton(this, wxID_ANY, _("Start"));
-
 
 	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(m_label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(m_label_cat_name_result, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(label_path, 0, wxALIGN_CENTER_VERTICAL);
+	info_grid->Add(m_label_path, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(label_record, 0, wxALIGN_CENTER_VERTICAL);
 	info_grid->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL);
 	
@@ -289,6 +291,14 @@ void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
 	m_selected_id = id; // ほかに引き渡す用途
 	m_label_ID_num->SetLabel(wxString::Format("%d", id));
 	m_label_cat_name_result->SetLabel(name);
+
+	// カテゴリのパス取得
+	std::string path = m_db.GetCategoriesPath(id);
+	if (path.empty()) {
+		m_label_path->SetLabel(_("None"));
+	} else {
+		m_label_path->SetLabel(wxString::FromUTF8(path));
+	}
 
 	// m_cb_auto_update が true のとき
 	if (m_cb_auto_update->GetValue()) {

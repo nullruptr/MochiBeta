@@ -1,4 +1,5 @@
 #include "core/db/database.hpp"
+#include <cstddef>
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
@@ -422,6 +423,70 @@ bool Database::GetRecordsByDate(
 	}
 
 	return true;
+}
+
+// カテゴリパスの取得．
+// ID を渡したら，std::string のパス形式でreturnする．
+std::string Database::GetCategoriesPath(int id) {
+	
+	if (db == nullptr) return "";
+
+	std::vector<std::string> path_components;
+	int current_id = id;
+	int safety_limit = 20; // 無限探索阻止用の変数
+
+	while (current_id > 0 && safety_limit > 0) {
+		safety_limit--;
+		// ID から，カテゴリ名とparent_idを取得
+		const char* sql = "SELECT name, parent_id FROM categories WHERE id = ?;";
+		sqlite3_stmt* stmt = nullptr;
+
+		if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+		break;
+		}
+
+		sqlite3_bind_int(stmt, 1, current_id);
+
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			// カテゴリ名格納 
+			const char* name_raw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+			// 親ID 格納
+			int parent_id = sqlite3_column_int(stmt, 1);
+
+			if (name_raw) {
+				// 取得したカテゴリ名を push_back
+				path_components.push_back(name_raw);
+			}
+
+			// 親ID = 0 or 自分自身が親のデータ（異常値）のとき終了
+			if (parent_id == 0 || parent_id == current_id) {
+				sqlite3_finalize(stmt);
+				break;
+			}
+			current_id = parent_id;
+		} else {
+			sqlite3_finalize(stmt);
+			break;
+		}
+		sqlite3_finalize(stmt);
+	}
+
+	if (path_components.empty()) {
+		return "";
+	}
+
+	// 子，親，祖父 -> 祖父，親，子 に変換
+	std::reverse(path_components.begin(), path_components.end());
+
+	// 文字列を "/" で結合
+	std::string full_path;
+	for (int i = 0; i < path_components.size(); ++i) {
+		full_path += path_components[i];
+		if (i != path_components.size() - 1) {
+			full_path += "/";
+		}
+	}
+	return full_path;
 }
 
 

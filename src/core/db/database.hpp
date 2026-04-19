@@ -34,6 +34,8 @@ public:
                       int offset_seconds,
                       std::vector<RecordSummary>& out);
 
+	std::string GetCategoriesPath(int id);
+
 	void Close(); // DB クローズ処理
 	
 	// --- db_activity_report.cpp ---

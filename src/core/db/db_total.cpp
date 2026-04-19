@@ -1,6 +1,6 @@
 #include "database.hpp"
 
-// 合計時刻取得
+// IDの合計時刻取得
 long long Database::GetTotalTime(int category_id, const std::string& start_utc, const std::string& end_utc) {
 	if (db == nullptr) return 0;
 
