@@ -10,7 +10,7 @@
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
-	wxDefaultPosition, wxSize(1400,1200),
+	wxDefaultPosition, wxSize(2000,1200),
 	wxDEFAULT_FRAME_STYLE) {
 	// wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
         // notify wxAUI which frame to use
@@ -92,7 +92,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Right()
         .Caption(_("Activity Report"))
         .Name(wxT("Activity Report"))
-        .BestSize(320, -1)
+        .BestSize(600, -1)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
 	); 
