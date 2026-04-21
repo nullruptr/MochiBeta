@@ -9,7 +9,7 @@ std::vector<Database::RecordSummary> Database::GetRecordsByRange(const std::stri
     // 3. MIN(終了時間, 指定期間末) - MAX(開始時間, 指定期間始) で、重なっている秒数を算出
     // 4. カテゴリIDごとに SUM で合計
     const char* sql = 
-        "SELECT c.name, SUM("
+        "SELECT c.id, c.name, SUM("
         "  strftime('%s', MIN(r.time_end, ?)) - "
         "  strftime('%s', MAX(r.time_begin, ?))"
         ") as duration "
@@ -32,9 +32,10 @@ std::vector<Database::RecordSummary> Database::GetRecordsByRange(const std::stri
 
 	while (sqlite3_step(stmt) == SQLITE_ROW) {
 		RecordSummary rs;
-		const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+		rs.category_id = sqlite3_column_int(stmt, 0);
+		const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
 		rs.category_name = name ? name : "Unknown";
-		rs.total_seconds = sqlite3_column_int64(stmt, 1);
+		rs.total_seconds = sqlite3_column_int64(stmt, 2);
         
 		// 0秒以下のゴミデータ（ロジック上は発生しないはずだが安全策）を除外
 		if (rs.total_seconds > 0) {

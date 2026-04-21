@@ -26,8 +26,9 @@ public:
 	bool EditParentId(long long id, long long parent_id); // ツリーアイテム移動
 
 	struct RecordSummary {
-	    std::string category_name;
-	    int total_seconds; // 合計秒数
+		int category_id;
+		std::string category_name;
+		int total_seconds; // 合計秒数
 	};
 
 	bool GetRecordsByDate(const std::string& local_date,

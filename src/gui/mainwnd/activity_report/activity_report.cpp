@@ -13,9 +13,11 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     m_list = new wxListCtrl(this, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
                             wxLC_REPORT | wxLC_HRULES | wxLC_VRULES);
-    m_list->InsertColumn(0, _("Category"), wxLIST_FORMAT_LEFT, 120);
-    m_list->InsertColumn(1, _("Total Time"), wxLIST_FORMAT_LEFT, 100);
-    m_list->InsertColumn(2, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, 80);
+    m_list->InsertColumn(0, _("ID"), wxLIST_FORMAT_LEFT, 50);
+    m_list->InsertColumn(1, _("Path"), wxLIST_FORMAT_LEFT, 200);
+    m_list->InsertColumn(2, _("Category"), wxLIST_FORMAT_LEFT, 120);
+    m_list->InsertColumn(3, _("Total Time"), wxLIST_FORMAT_LEFT, 100);
+    m_list->InsertColumn(4, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, 80);
     sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
     // --- 下部: 合計表示 ---
@@ -44,14 +46,20 @@ void ActivityReport::LoadReport() {
 	}
 
 	for (const auto& rs : summaries) {
+		// ID
+		long idx = m_list->InsertItem(m_list->GetItemCount(), wxString::Format("%d", rs.category_id));
+
+		// Path
+		std::string path = m_db.GetCategoriesPath(rs.category_id);
+		m_list->SetItem(idx, 1, wxString::FromUTF8(path));
 		// カテゴリ名
-		long idx = m_list->InsertItem(m_list->GetItemCount(), wxString::FromUTF8(rs.category_name));
+		m_list->SetItem(idx, 2, wxString::FromUTF8(rs.category_name));
 		// 合計時間
 		int h = rs.total_seconds / 3600;
 		int m = (rs.total_seconds % 3600) / 60;
 		int s = rs.total_seconds % 60;
         
-		m_list->SetItem(idx, 1, wxString::Format("%02d:%02d:%02d", h, m, s));
+		m_list->SetItem(idx, 3, wxString::Format("%02d:%02d:%02d", h, m, s));
 
 		// 割合
 		double ratio = 0.0;
@@ -59,7 +67,7 @@ void ActivityReport::LoadReport() {
 			// (取得秒数 / 合計秒数) * 100 => 割合
 			ratio = (static_cast<double>(rs.total_seconds) / total_seconds) * 100.0;
 		}
-		m_list->SetItem(idx, 2, wxString::Format("%.1f%%", ratio));
+		m_list->SetItem(idx, 4, wxString::Format("%.1f%%", ratio));
 	}
 
 	m_total_label->SetLabel(wxString::Format("Total: %02lld:%02lld:%02lld", 
