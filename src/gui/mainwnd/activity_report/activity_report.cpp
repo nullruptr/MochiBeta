@@ -1,4 +1,5 @@
 #include "activity_report.hpp"
+#include "core/utils/format_time.hpp"
 #include <wx/listbase.h>
 #include <wx/wx.h>
 #include <wx/dateevt.h>
@@ -59,7 +60,7 @@ void ActivityReport::LoadReport() {
 		int m = (rs.total_seconds % 3600) / 60;
 		int s = rs.total_seconds % 60;
         
-		m_list->SetItem(idx, 3, wxString::Format("%02d:%02d:%02d", h, m, s));
+		m_list->SetItem(idx, 3, TimeUtils::FormatSeconds(rs.total_seconds));
 
 		// 割合
 		double ratio = 0.0;
@@ -70,8 +71,7 @@ void ActivityReport::LoadReport() {
 		m_list->SetItem(idx, 4, wxString::Format("%.1f%%", ratio));
 	}
 
-	m_total_label->SetLabel(wxString::Format("Total: %02lld:%02lld:%02lld", 
-        total_seconds / 3600, (total_seconds % 3600) / 60, total_seconds % 60));
+	m_total_label->SetLabel(_("Total: ") + TimeUtils::FormatSeconds(total_seconds));
 }
 
 void ActivityReport::SetPeriodAndRefresh(const wxDateTime& start, const wxDateTime& end) {

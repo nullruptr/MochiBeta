@@ -1,4 +1,5 @@
 #include "dashboard.hpp"
+#include "core/utils/format_time.hpp"
 #include "gui/mainwnd/mainwnd.hpp"
 #include <string>
 #include <wx/datetime.h>
@@ -338,18 +339,10 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	long long total_sec = m_db.GetTotalTime(m_selected_id, start_utc, end_utc);
 	long long total_sec_all = m_db.GetTotalTime(m_selected_id, start_utc_all, end_utc);
 
-	// 時間表示の整形
-	auto format_time = [](long long total_seconds) -> wxString {
-		long long h = total_seconds / 3600;
-		long long m = (total_seconds % 3600) / 60;
-		long long s = total_seconds % 60;
-		return wxString::Format("%02lld:%02lld:%02lld", h, m, s);
-	};
-
 	// 表示
 	// 分と秒は2桁固定
-	m_result_total_time_range->SetLabel(wxString::Format(format_time(total_sec)));
-	m_result_total_time_all->SetLabel(wxString::Format(format_time(total_sec_all)));
+	m_result_total_time_range->SetLabel(TimeUtils::FormatSeconds(total_sec));
+	m_result_total_time_all->SetLabel(TimeUtils::FormatSeconds(total_sec_all));
 
 	// 表示内容更新イベント
 	// 無限ループ防止のために、MAINWND から更新処理が来たら、除外する
