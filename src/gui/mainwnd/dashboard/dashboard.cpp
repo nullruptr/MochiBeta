@@ -79,6 +79,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	range_sizer->Add(m_cb_auto_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 	sizer->Add(range_sizer, 0, wxALL, 10);
 
+
 		// --- オフセット操作エリア ---
 	// 3行（年・月・日）× 3列（ラベル・前へ・次へ）のグリッド
 	wxFlexGridSizer* offset_grid = new wxFlexGridSizer(3, 3, 5, 5);
@@ -116,10 +117,14 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	sizer->Add(offset_grid, 0, wxALL, 10);
 
+	
 	// --- ステータス表示 ---
 	wxStaticBoxSizer* stat_box = new wxStaticBoxSizer(wxVERTICAL, this, _("Statistics"));
-	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(4, 2, 8, 20);
+	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(5, 2, 8, 20);
 	
+	wxStaticText* label_search_scope = new wxStaticText(this, wxID_ANY, _("Search Scope:"));
+	m_btn_search_scope = new wxButton(this, wxID_ANY, _("Detail"));
+
 	wxStaticText* stat_total_time_all = new wxStaticText(this, wxID_ANY, _("Total Time (All-time):"));
 	m_result_total_time_all = new wxStaticText(this, wxID_ANY, _("00:00:00"));
 	wxStaticText* stat_total_time_range = new wxStaticText(this, wxID_ANY, _("Total Time (Selected Range):"));
@@ -129,6 +134,8 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxStaticText* stat_last_run = new wxStaticText(this, wxID_ANY, _("Last Executed:"));
 	wxStaticText* result_last_run = new wxStaticText(this, wxID_ANY, _("0000-00-00"));
 
+	stat_grid->Add(label_search_scope, 0, wxALIGN_CENTER_VERTICAL, 5);
+	stat_grid->Add(m_btn_search_scope, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(m_result_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
 	stat_grid->Add(stat_total_time_range, 0, wxALIGN_CENTER_VERTICAL);

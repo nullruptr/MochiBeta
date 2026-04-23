@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
+#include <wx/dataview.h>
 #include "core/db/database.hpp"
 
 enum RangeIndex {
@@ -37,6 +38,7 @@ private:
 	wxStaticText* m_label_ID_num;
 	wxStaticText* m_label_cat_name_result;
 	wxStaticText* m_label_path;
+	wxButton* m_btn_search_scope;
 	wxChoice *m_date_range;
 	wxStaticText* m_period_display;
 	wxDatePickerCtrl* m_date_picker_start;
