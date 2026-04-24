@@ -11,7 +11,7 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 	m_st_label_ID = new wxStaticText(this, wxID_ANY, _("ID"));
 	m_st_label_ID_num = new wxStaticText(this, wxID_ANY, "");
 	m_st_label_name = new wxStaticText(this, wxID_ANY, _("Name"));
-	m_tc_name = new wxTextCtrl(this, wxID_ANY, "");
+	m_tc_name = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
 	// 初期状態で隠す
 	ViewCtrl(Status::HIDE);
@@ -25,7 +25,7 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 	SetSizer(sizer);
 	sizer->Fit(this);
 
-	m_tc_name->Bind(wxEVT_KILL_FOCUS, &Inspector::OnNameKillFocus, this);
+	m_tc_name->Bind(wxEVT_TEXT_ENTER, &Inspector::OnEnterPressed, this);
 }
 
 void Inspector::UpdateSelectedCategory(int id, const wxString& name) {
@@ -67,18 +67,15 @@ void Inspector::ViewCtrl(Status status) { // 内容の表示or非表示のコン
 		}
 	}
 }
-// tc からフォーカスが外れか否かを監視
-// 変更されてたら、保存を実行する処理
-void Inspector::OnNameKillFocus(wxFocusEvent& event) { 
-	wxString current_name = m_tc_name->GetValue();
 
+void Inspector::OnEnterPressed(wxCommandEvent& event) {
+	wxString current_name = m_tc_name->GetValue();
 	if (current_name != m_old_name) {
 		wxCommandEvent dummy;
 		OnSave(dummy);
 
 		m_old_name = current_name; // 保存に成功したので、old_name も更新
 	}
-	event.Skip();
 }
 
 void Inspector::OnSave(wxCommandEvent& event) { // 保存

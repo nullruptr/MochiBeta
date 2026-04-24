@@ -15,7 +15,7 @@ public:
 	Inspector(wxWindow* parent, Database& db);
 	void UpdateSelectedCategory(int id, const wxString& name);
 	void ViewCtrl(Status);
-	void OnNameKillFocus(wxFocusEvent& event); // OnSave実行用ハンドラ
+	void OnEnterPressed(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 private:
 	Database &m_db;
