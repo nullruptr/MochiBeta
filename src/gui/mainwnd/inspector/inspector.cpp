@@ -30,6 +30,7 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 
 void Inspector::UpdateSelectedCategory(int id, const wxString& name) {
 	m_selected_id = id; // ほかに引き渡す用途
+	m_selected_name = name;
 	m_st_label_ID_num->SetLabel(wxString::Format("%d", id));
 	m_tc_name->SetValue(name);
 	m_old_name = name; // 現在の値を保持。OnSave で使う
@@ -111,4 +112,9 @@ void Inspector::OnSave(wxCommandEvent& event) { // 保存
 	evt.SetInt(m_selected_id);
 	evt.SetString(name);
 	wxPostEvent(GetParent(), evt);
+}
+
+void Inspector::GetIdAndName(int& id, wxString& name) { // 外部からidとname を取得する
+	id = m_selected_id;
+	name = m_selected_name;
 }

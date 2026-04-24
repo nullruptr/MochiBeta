@@ -196,6 +196,12 @@ void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 void Mainwnd::OnStartRecordToRecWnd(wxCommandEvent& event) {
 	int catId = event.GetInt();
 	wxString catName = event.GetString();
+
+	// イベントに値がない場合（▶ボタン経由）は Inspector から取得
+	if (catId == 0 && catName.IsEmpty()) {
+		m_inspector->GetIdAndName(catId, catName);
+	}
+
 	if (m_recording) {
 		m_recording->OnStartRecord(catId, catName);
 	}

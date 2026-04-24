@@ -1,6 +1,7 @@
 #include "recording.hpp"
 #include "core/db/database.hpp"
 #include "gui/mainwnd/mainwnd.hpp"
+#include "gui/mainwnd/inspector/inspector.hpp"
 #include <wx/dataview.h>
 #include <wx/event.h>
 #include <wx/msgdlg.h>
@@ -29,21 +30,33 @@ Recording::Recording(wxWindow* parent, Database &dbRef) : wxPanel(parent) , m_db
 	sizer->Add(dvlc_sizer, 1, wxEXPAND);
 
 	wxStaticText* record_id = new wxStaticText(this, wxID_ANY, "Record ID:");
-	m_st_rid = new wxStaticText(this, wxID_ANY, "0");
-	m_btn_stop = new wxButton(this, wxID_ANY, _("Stop"));
+	m_st_rid = new wxStaticText(this, wxID_ANY, "-");
+	m_btn_start = new wxButton(this, wxID_ANY, wxT("▶"));
+	m_btn_stop = new wxButton(this, wxID_ANY, wxT("■"));
 
+	m_btn_start->Bind(wxEVT_BUTTON, &Recording::OnStartRecordFromBtn, this);
 	m_btn_stop->Bind(wxEVT_BUTTON, &Recording::OnStopRecord, this);
 
 	ctrl_sizer->AddStretchSpacer();
 	ctrl_sizer->Add(record_id, 0, wxALIGN_CENTER_VERTICAL);
 	ctrl_sizer->Add(m_st_rid, 0, wxALIGN_CENTER_VERTICAL);
 	ctrl_sizer->AddSpacer(10);
+	ctrl_sizer->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
 	ctrl_sizer->Add(m_btn_stop, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
 
 	sizer->Add(ctrl_sizer, 0, wxEXPAND | wxALL, 10);
 	SetSizer(sizer);
 }
 
+// Recording 側の start ボタンから Record を開始する場合。
+// Inspector から、ID と名前を取得し、OnStartへ。->Record 開始
+void Recording::OnStartRecordFromBtn(wxCommandEvent& event){
+	wxCommandEvent evt(wxEVT_MENU, ID_START_RECORDING);
+	// id と name は Mainwnd が Inspector から取って Recording に渡す
+	wxPostEvent(GetParent(), evt);
+}
+
+// 外部から Record を開始する場合。
 void Recording::OnStartRecord(int id, const wxString& name) {
 	m_selected_id = id; // ほかに引き渡す用途
 	long long recordId = this->m_db.StartRecord(m_selected_id);
@@ -112,7 +125,7 @@ void Recording::OnStopRecord(wxCommandEvent& event) {
 		m_dvlc->DeleteItem(row);
 
 		// 削除後は選択が消えるので、表示リセット
-		m_st_rid->SetLabel("0");
+		m_st_rid->SetLabel("-");
 
 		if (m_dvlc->GetItemCount() == 0) {
 			m_timer.Stop();

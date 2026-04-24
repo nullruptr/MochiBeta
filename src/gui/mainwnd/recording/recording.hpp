@@ -4,9 +4,12 @@
 #include <wx/dataview.h>
 #include "core/db/database.hpp"
 
+class Inspector;
+
 class Recording : public wxPanel {
 public:
 	Recording(wxWindow* parent, Database& db);
+	void OnStartRecordFromBtn(wxCommandEvent& event);
 	void OnStartRecord(int id, const wxString& name);
 	void OnStopRecord(wxCommandEvent& event);
 	void OnTimer(wxTimerEvent& event);
@@ -17,10 +20,10 @@ private:
 	int m_selected_id = -1; // 受け取った数値 int ver
 
 	wxDataViewListCtrl* m_dvlc;
+	wxButton* m_btn_start;
 	wxButton* m_btn_stop;
 	wxStaticText* m_st_rid;
 	wxTimer m_timer{this};
-
 };
 
 

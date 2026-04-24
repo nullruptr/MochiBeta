@@ -17,9 +17,11 @@ public:
 	void ViewCtrl(Status);
 	void OnEnterPressed(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
+	void GetIdAndName(int& id, wxString& name); 
 private:
 	Database &m_db;
 	int m_selected_id;
+	wxString m_selected_name;
 	wxStaticText* m_st_label_ID;
 	wxStaticText* m_st_label_ID_num;
 	wxStaticText* m_st_label_name;
