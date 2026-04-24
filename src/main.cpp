@@ -1,6 +1,7 @@
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
 #include "gui/mainwnd/mainwnd.hpp"
+#include "version.hpp"
 
 // enum は，mainwnd.hpp に移植
 
@@ -19,7 +20,7 @@ bool MBApp::OnInit() {
 	locale.AddCatalogLookupPathPrefix("locale");
 	locale.AddCatalog("mb");
 	Mainwnd *mainwnd = new Mainwnd(nullptr); 
-	mainwnd->SetTitle("MochiBeta"); // Build habits the sticky way
+	mainwnd->SetTitle(AppVersion::Get()); // Build habits the sticky way
 	mainwnd->Show(true);
 	return true;
 }
