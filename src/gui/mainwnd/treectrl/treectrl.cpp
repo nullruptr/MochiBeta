@@ -75,7 +75,6 @@ void CategoryTree::OnUpdateKeyDown(wxKeyEvent& event) { // F5 でアップデー
 }
 
 void CategoryTree::UpdateTreeData() {
-
 	std::vector<Database::Category> categories;
 
 	if (!m_db.GetAllCategories(categories)){ // 全件格納。無理ならreturn。

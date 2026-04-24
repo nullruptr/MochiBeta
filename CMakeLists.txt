@@ -31,6 +31,7 @@ set(SOURCES
 	src/gui/mainwnd/activity_report/activity_report.cpp
 	src/gui/mainwnd/clock/clock.cpp
 	src/gui/mainwnd/dashboard/dashboard.cpp
+	src/gui/mainwnd/inspector/inspector.cpp
 	src/gui/mainwnd/recording/recording.cpp
 	src/gui/mainwnd/treectrl/treectrl.cpp
 	src/gui/mainwnd/mainwnd.cpp

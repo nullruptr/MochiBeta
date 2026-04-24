@@ -1,4 +1,3 @@
-#include <wx/event.h>
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
@@ -42,6 +41,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnStartRecordToRecWnd, this, ID_START_RECORDING);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_UPDATE_STATISTICS);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_ACTIVITY_REPORT);
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategoryUpdated, this, ID_CATEGORY_UPDATED);
 
 	// Dashboard
 	m_dashboard = new Dashboard(this, db);
@@ -53,6 +53,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	m_categoryTree = new CategoryTree(this, db);
 	// Activity Report
 	m_activity_report = new ActivityReport(this, db);
+	// Inspector
+	m_inspector = new Inspector(this, db);
 
 	m_mgr.AddPane(m_dashboard, wxAuiPaneInfo().CenterPane());
 
@@ -85,6 +87,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Name(wxT("treePane"))
         .BestSize(250, -1)
         .Layer(1)
+	.Position(0)
+	.Row(0) // 左側のエリアの 0番目
 	.CloseButton(false) // 閉じるボタン無効
 	); 
 
@@ -94,6 +98,17 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Name(wxT("Activity Report"))
         .BestSize(600, -1)
         .Layer(1)
+	.CloseButton(false) // 閉じるボタン無効
+	); 
+
+	m_mgr.AddPane(m_inspector, wxAuiPaneInfo()
+        .Left()
+        .Caption(_("Inspector"))
+        .Name(wxT("Inspector"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.Position(0) 
+	.Row(1) // 左側のエリアの 1番目
 	.CloseButton(false) // 閉じるボタン無効
 	); 
 
@@ -170,6 +185,7 @@ void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
 	// Dashboard の表示を更新
 	if (m_dashboard) {
 		m_dashboard->UpdateSelectedCategory(catId, catName);
+		m_inspector->UpdateSelectedCategory(catId, catName);
 	}
 	if (m_activity_report) {
 		wxCommandEvent dummy;
@@ -194,6 +210,12 @@ void Mainwnd::OnRecordUpdate(wxCommandEvent& event) { // 表示内容更新
 	if (m_dashboard) {
 		wxCommandEvent dummy;
 		m_dashboard->OnUpdateStatistics(dummy, EventType::FROM_MAINWND);
+	}
+}
+
+void Mainwnd::OnCategoryUpdated(wxCommandEvent& event) {
+	if (m_categoryTree) {
+		m_categoryTree->UpdateTreeData();
 	}
 }
 

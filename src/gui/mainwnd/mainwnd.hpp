@@ -1,3 +1,4 @@
+#pragma once
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/treebase.h>
@@ -8,6 +9,7 @@
 #include "gui/mainwnd/recording/recording.hpp"
 #include "gui/mainwnd/dashboard/dashboard.hpp"
 #include "gui/mainwnd/activity_report/activity_report.hpp"
+#include "gui/mainwnd/inspector/inspector.hpp"
 
 enum {
 	ID_CONNECT_DB, //DBファイル
@@ -16,8 +18,11 @@ enum {
 	ID_ACTIVITY_REPORT, // 実績照会ウィンドウ表示
 	ID_CATEGORY_SELECTED = wxID_HIGHEST + 1, // TreeCtrl からの情報受取
 	ID_START_RECORDING, // レコード開始イベント監視
-	ID_UPDATE_STATISTICS // 統計更新イベント処理
+	ID_UPDATE_STATISTICS, // 統計更新イベント処理
+	ID_CATEGORY_UPDATED // カテゴリ名が更新されたとき
 };
+
+class Inspector;
 
 class Mainwnd : public wxFrame {
 public:
@@ -31,6 +36,7 @@ Mainwnd(wxWindow* parent);
 	void OnCategorySelected(wxCommandEvent& event); // Dashboard のID と CatName の表示更新。Dashboardに渡す
 	void OnStartRecordToRecWnd(wxCommandEvent& event);
 	void OnRecordUpdate(wxCommandEvent& event);
+	void OnCategoryUpdated(wxCommandEvent& event);
 
 virtual ~Mainwnd();
 
@@ -41,4 +47,5 @@ private:
 	Recording* m_recording;
 	Dashboard* m_dashboard;
 	ActivityReport* m_activity_report;
+	Inspector* m_inspector;
 };
