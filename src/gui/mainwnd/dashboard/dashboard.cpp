@@ -192,15 +192,18 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 		case RANGE_THIS_WEEK:
 			// 月曜日開始
 			start = now.GetWeekDayInSameWeek(wxDateTime::Mon);
+			start.ResetTime();
 			break;
 
 		case RANGE_THIS_MONTH:
 			start.SetDay(1);
+			start.ResetTime();
 			break;
 
 		case RANGE_THIS_YEAR:
 			start.SetMonth(wxDateTime::Jan);
 			start.SetDay(1);
+			start.ResetTime();
 			break;
 
 		case RANGE_LAST_1_MONTH:
