@@ -1,3 +1,4 @@
+#include <wx/event.h>
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
@@ -11,7 +12,11 @@
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	wxDefaultPosition, wxSize(2000,1200),
 	wxDEFAULT_FRAME_STYLE) {
-	// wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
+	/*
+	wxLog::SetLogLevel(wxLOG_Max);
+	wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
+	wxLogMessage("Log System Initialized.");
+	*/
         // notify wxAUI which frame to use
         m_mgr.SetManagedWindow(this);
 
@@ -22,18 +27,23 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT, _("Quit\t F12"));
 
+	wxMenu* menuEdit = new wxMenu;
+	menuEdit->Append(ID_MENU_TODO, _("Todo"));
+
 	wxMenu *menuLegacy = new wxMenu;
 	menuLegacy->Append(ID_TIME_LOG, _("Time Log"));
 
 	// メニューバーの設定
 	wxMenuBar *menuBar = new wxMenuBar;
 	menuBar->Append(menuFile, _("File"));
+	menuBar->Append(menuEdit, _("Edit"));
 	menuBar->Append(menuLegacy, _("Legacy"));
 	SetMenuBar(menuBar);
 
 	// メニューバインド
 	Bind(wxEVT_MENU, &Mainwnd::OnConnectDB, this, ID_CONNECT_DB);
 	Bind(wxEVT_MENU, &Mainwnd::OnQuit, this, wxID_EXIT);
+	Bind(wxEVT_MENU, &Mainwnd::OnTodo, this, ID_MENU_TODO);
 	Bind(wxEVT_MENU, &Mainwnd::OnTimeLog, this, ID_TIME_LOG);
 
 	// 発火イベント受信用
@@ -153,6 +163,24 @@ void Mainwnd::OnQuit(wxCommandEvent& WXUNUSED(event)){ // 終了確認
 	}
 
 	Close(true);
+}
+
+void Mainwnd::OnTodo(wxCommandEvent& event) {
+	wxLogDebug("OnTodo called");
+	// DB 接続判定
+	if (current_DB_Path.IsEmpty()){
+		wxMessageBox(
+				_("Unable to connect database"),
+				"DB Error",
+				wxOK | wxICON_ERROR,
+				this
+			    );
+		return;
+	}
+	wxLogDebug("DB check passed");
+	Todo* todo = new Todo(this, db);
+	todo->Show(true);
+
 }
 
 void Mainwnd::OnTimeLog(wxCommandEvent& event){
