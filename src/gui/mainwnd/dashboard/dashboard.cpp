@@ -15,29 +15,6 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	  , m_db(dbRef) {
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	// --- info ---
-	wxFlexGridSizer* info_grid = new wxFlexGridSizer(4, 2, 5, 5);
-
-	wxStaticText* label_ID = new wxStaticText(this, wxID_ANY, _("ID: "));
-	m_label_ID_num = new wxStaticText(this, wxID_ANY, _("None"));
-	wxStaticText* label_cat_name = new wxStaticText(this, wxID_ANY, _("Category Name: "));
-	m_label_cat_name_result = new wxStaticText(this, wxID_ANY, _("None"));
-	wxStaticText* label_path = new wxStaticText(this, wxID_ANY, _("Path:"));
-	m_label_path = new wxStaticText(this, wxID_ANY, _("None"));
-	wxStaticText* label_record = new wxStaticText(this, wxID_ANY, _("Record"));
-	m_btn_start = new wxButton(this, wxID_ANY, _("Start"));
-
-	info_grid->Add(label_ID, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(m_label_ID_num, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(label_cat_name, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(m_label_cat_name_result, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(label_path, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(m_label_path, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(label_record, 0, wxALIGN_CENTER_VERTICAL);
-	info_grid->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL);
-	
-	sizer->Add(info_grid, 0, wxEXPAND | wxALL, 10);
-
 	// --- レンジ ---
 	wxBoxSizer* range_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* date_label = new wxStaticText(this, wxID_ANY, _("Range: "));
@@ -119,41 +96,9 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 
 	sizer->Add(offset_grid, 0, wxALL, 10);
 
-	
-	// --- ステータス表示 ---
-	wxStaticBoxSizer* stat_box = new wxStaticBoxSizer(wxVERTICAL, this, _("Statistics"));
-	wxFlexGridSizer* stat_grid = new wxFlexGridSizer(5, 2, 8, 20);
-	
-	wxStaticText* label_search_scope = new wxStaticText(this, wxID_ANY, _("Search Scope:"));
-	m_btn_search_scope = new wxButton(this, wxID_ANY, _("Detail"));
-
-	wxStaticText* stat_total_time_all = new wxStaticText(this, wxID_ANY, _("Total Time (All-time):"));
-	m_result_total_time_all = new wxStaticText(this, wxID_ANY, _("00:00:00"));
-	wxStaticText* stat_total_time_range = new wxStaticText(this, wxID_ANY, _("Total Time (Selected Range):"));
-	m_result_total_time_range = new wxStaticText(this, wxID_ANY, _("00:00:00"));
-	wxStaticText* stat_streak = new wxStaticText(this, wxID_ANY, _("Current Streak:"));
-	wxStaticText* result_streak = new wxStaticText(this, wxID_ANY, _("0d"));
-	wxStaticText* stat_last_run = new wxStaticText(this, wxID_ANY, _("Last Executed:"));
-	wxStaticText* result_last_run = new wxStaticText(this, wxID_ANY, _("0000-00-00"));
-
-	stat_grid->Add(label_search_scope, 0, wxALIGN_CENTER_VERTICAL, 5);
-	stat_grid->Add(m_btn_search_scope, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(m_result_total_time_all, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_total_time_range, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(m_result_total_time_range, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_streak, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(result_streak, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(stat_last_run, 0, wxALIGN_CENTER_VERTICAL);
-	stat_grid->Add(result_last_run, 0, wxALIGN_CENTER_VERTICAL);
-	
-	stat_box->Add(stat_grid, 0, wxLEFT, 10);
-	sizer->Add(stat_box, 0, wxALL, 10);
-
 	this->SetSizer(sizer);
 
 	m_date_range->Bind(wxEVT_CHOICE, &Dashboard::OnRangeChanged, this);
-	m_btn_start->Bind(wxEVT_BUTTON, &Dashboard::OnStartRecordEvtSend, this);
 	// dashboard.cpp のコンストラクタ内
 	// event 引数が2つ以上あるので、ラムダ式で対応
 	m_btn_update->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -277,49 +222,16 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 		wxCommandEvent evt_activity_report(wxEVT_MENU, ID_ACTIVITY_REPORT);
 		evt_activity_report.SetEventObject(this);
 		wxPostEvent(GetParent(), evt_activity_report);
+		
+		// statistic に 更新イベントを投げる
+		wxCommandEvent evt_statistic(wxEVT_MENU, ID_UPDATE_STATISTIC);
+		evt_activity_report.SetEventObject(this);
+		wxPostEvent(GetParent(), evt_activity_report);
 	}
 
 	this->GetSizer()->Layout();
 }
 
-// 記録開始イベント送信
-void Dashboard::OnStartRecordEvtSend(wxCommandEvent& event) {
-	wxCommandEvent evt_start(wxEVT_MENU, ID_START_RECORDING);
-
-	if (m_selected_id == -1) {
-		wxMessageBox(_("Please select a category first."), _("Error"), wxOK | wxICON_ERROR);
-		return;
-	}
-	// イベントの発生源を自分に設定
-	evt_start.SetInt(m_selected_id);
-	evt_start.SetEventObject(this);
-	evt_start.SetString(m_label_cat_name_result->GetLabelText());
-	// 親ウィンドウへ向かってイベントを投げる
-	wxPostEvent(GetParent(), evt_start);
-}
-
-// 上部 info 更新
-void Dashboard::UpdateSelectedCategory(int id, const wxString& name) {
-	m_selected_id = id; // ほかに引き渡す用途
-	m_label_ID_num->SetLabel(wxString::Format("%d", id));
-	m_label_cat_name_result->SetLabel(name);
-
-	// カテゴリのパス取得
-	std::string path = m_db.GetCategoriesPath(id);
-	if (path.empty()) {
-		m_label_path->SetLabel(_("None"));
-	} else {
-		m_label_path->SetLabel(wxString::FromUTF8(path));
-	}
-
-	// m_cb_auto_update が true のとき
-	if (m_cb_auto_update->GetValue()) {
-		wxCommandEvent evt_update;
-		OnUpdateStatistics(evt_update, EventType::FROM_MYSELF);
-	}
-	// レイアウト崩れ防止
-	this->Layout();
-}
 
 void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	if (m_selected_id == -1) return;
@@ -350,7 +262,7 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	// 表示内容更新イベント
 	// 無限ループ防止のために、MAINWND から更新処理が来たら、除外する
 	if (type == EventType::FROM_MYSELF) {
-		wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTICS);
+		wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTIC);
 		evt.SetEventObject(this);
 		wxPostEvent(GetParent(), evt);
 	}

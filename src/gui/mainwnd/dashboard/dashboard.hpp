@@ -29,8 +29,6 @@ class Dashboard : public wxPanel {
 public:
 	Dashboard(wxWindow* parent, Database& db);
 	void OnRangeChanged(wxCommandEvent& event);
-	void OnStartRecordEvtSend(wxCommandEvent& event);
-	void UpdateSelectedCategory(int id, const wxString& name);
 	void OnUpdateStatistics(wxCommandEvent& event, EventType type);
 	void GetCurrentRange(wxDateTime& start, wxDateTime& end) const;
 private:

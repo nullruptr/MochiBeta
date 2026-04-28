@@ -39,7 +39,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	// 発火イベント受信用
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategorySelected, this, ID_CATEGORY_SELECTED);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnStartRecordToRecWnd, this, ID_START_RECORDING);
-	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_UPDATE_STATISTICS);
+	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_UPDATE_STATISTIC);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnRecordUpdate, this, ID_ACTIVITY_REPORT);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &Mainwnd::OnCategoryUpdated, this, ID_CATEGORY_UPDATED);
 
@@ -55,6 +55,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	m_activity_report = new ActivityReport(this, db);
 	// Inspector
 	m_inspector = new Inspector(this, db);
+	// Statistic
+	m_statistic = new Statistic(this, db);
 
 	m_mgr.AddPane(m_dashboard, wxAuiPaneInfo().CenterPane());
 
@@ -109,6 +111,17 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Layer(1)
 	.Position(0) 
 	.Row(1) // 左側のエリアの 1番目
+	.CloseButton(false) // 閉じるボタン無効
+	); 
+
+	m_mgr.AddPane(m_statistic, wxAuiPaneInfo()
+        .Left()
+        .Caption(_("Statistic"))
+        .Name(wxT("Statistic"))
+        .BestSize(250, -1)
+        .Layer(1)
+	.Row(0)
+	.Position(1) 
 	.CloseButton(false) // 閉じるボタン無効
 	); 
 
@@ -177,17 +190,18 @@ void Mainwnd::OnConnectDB(wxCommandEvent& event){
 
 // --- 以下イベント転送 ---
 
-void Mainwnd::OnCategorySelected(wxCommandEvent& event) {
+void Mainwnd::OnCategorySelected(wxCommandEvent& event) { // 表示内容更新など
 	// イベントに格納された数値を引っ張り出す
 	int catId = event.GetInt();
 	wxString catName = event.GetString();
 
-	// Dashboard の表示を更新
-	if (m_dashboard) {
-		m_dashboard->UpdateSelectedCategory(catId, catName);
+	// inspector と statistic の表示を更新
+	if (m_inspector) {
 		m_inspector->UpdateSelectedCategory(catId, catName);
+		m_statistic->GetId(catId);
 	}
-	if (m_activity_report) {
+	if (m_activity_report && m_statistic) {
+		// 選択区間を送付する 
 		wxCommandEvent dummy;
 		OnRecordUpdate(dummy);
 	}
@@ -207,15 +221,12 @@ void Mainwnd::OnStartRecordToRecWnd(wxCommandEvent& event) {
 	}
 }
 
-void Mainwnd::OnRecordUpdate(wxCommandEvent& event) { // 表示内容更新
-	if (m_activity_report && m_dashboard) {
+void Mainwnd::OnRecordUpdate(wxCommandEvent& event) { // 表示内容更新 & start time と end time を取得
+	if (m_activity_report && m_dashboard && m_statistic) {
 		wxDateTime start, end;
 		m_dashboard->GetCurrentRange(start, end);
 		m_activity_report->SetPeriodAndRefresh(start, end);
-	}
-	if (m_dashboard) {
-		wxCommandEvent dummy;
-		m_dashboard->OnUpdateStatistics(dummy, EventType::FROM_MAINWND);
+		m_statistic->GetCurrentRange(start, end);
 	}
 }
 

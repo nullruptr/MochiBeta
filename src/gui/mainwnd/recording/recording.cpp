@@ -133,7 +133,7 @@ void Recording::OnStopRecord(wxCommandEvent& event) {
 	}
 	// 統計情報自動更新
 	// CheckBox のチェック有無は、dashboard 側で管理してる
-	wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTICS);
+	wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTIC);
 	evt.SetEventObject(this);
 	wxPostEvent(GetParent(), evt);
 }

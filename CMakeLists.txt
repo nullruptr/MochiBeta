@@ -33,6 +33,7 @@ set(SOURCES
 	src/gui/mainwnd/dashboard/dashboard.cpp
 	src/gui/mainwnd/inspector/inspector.cpp
 	src/gui/mainwnd/recording/recording.cpp
+	src/gui/mainwnd/statistic/statistic.cpp
 	src/gui/mainwnd/treectrl/treectrl.cpp
 	src/gui/mainwnd/mainwnd.cpp
 	src/gui/record/record_window.cpp

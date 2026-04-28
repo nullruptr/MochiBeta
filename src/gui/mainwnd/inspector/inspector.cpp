@@ -1,4 +1,6 @@
 #include "inspector.hpp"
+#include <wx/event.h>
+#include <wx/filefn.h>
 
 Inspector::Inspector(wxWindow* parent, Database &dbRef) 
 	: wxPanel(parent, wxID_ANY)
@@ -6,13 +8,15 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 		
 	
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	wxFlexGridSizer* inspector_grid = new wxFlexGridSizer(2, 2, 5, 5);
+	wxFlexGridSizer* inspector_grid = new wxFlexGridSizer(3, 2, 5, 5);
 
 	m_st_label_ID = new wxStaticText(this, wxID_ANY, _("ID"));
 	m_st_label_ID_num = new wxStaticText(this, wxID_ANY, "");
 	m_st_label_name = new wxStaticText(this, wxID_ANY, _("Name"));
 	m_tc_name = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-
+	m_st_path = new wxStaticText(this, wxID_ANY, _("Path"));
+	m_label_path = new wxStaticText(this, wxID_ANY, _(""));
+	
 	// 初期状態で隠す
 	ViewCtrl(Status::HIDE);
 
@@ -20,6 +24,8 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 	inspector_grid->Add(m_st_label_ID_num, 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	inspector_grid->Add(m_st_label_name, 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	inspector_grid->Add(m_tc_name, 0, wxALL | wxALIGN_CENTER_VERTICAL);
+	inspector_grid->Add(m_st_path, 0, wxALL | wxALIGN_CENTER_VERTICAL);
+	inspector_grid->Add(m_label_path, 0, wxALL | wxALIGN_CENTER_VERTICAL);
 
 	sizer->Add(inspector_grid, 1, wxALL | wxEXPAND, 5);
 	SetSizer(sizer);
@@ -35,6 +41,12 @@ void Inspector::UpdateSelectedCategory(int id, const wxString& name) {
 	m_tc_name->SetValue(name);
 	m_old_name = name; // 現在の値を保持。OnSave で使う
 
+	std::string path = m_db.GetCategoriesPath(id);
+	if (path.empty()) {
+		m_label_path->SetLabel(_("None"));
+	} else {
+		m_label_path->SetLabel(wxString::FromUTF8(path));
+	}
 	if (id == 0 && !name.IsEmpty()) {
 		ViewCtrl(Status::HIDE);
 	} else {
@@ -62,7 +74,9 @@ void Inspector::ViewCtrl(Status status) { // 内容の表示or非表示のコン
 		static_cast<wxWindow*>(m_st_label_ID), 
 		static_cast<wxWindow*>(m_st_label_ID_num), 
 		static_cast<wxWindow*>(m_st_label_name), 
-		static_cast<wxWindow*>(m_tc_name) }) {
+		static_cast<wxWindow*>(m_tc_name),
+		static_cast<wxWindow*>(m_st_path),
+		static_cast<wxWindow*>(m_label_path) }) {
 		if (ctrl) {
 			ctrl->Show(show_flag);
 		}
