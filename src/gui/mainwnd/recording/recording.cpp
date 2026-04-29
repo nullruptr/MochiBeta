@@ -18,11 +18,11 @@ Recording::Recording(wxWindow* parent, Database &dbRef) : wxPanel(parent) , m_db
 	m_dvlc = new wxDataViewListCtrl(this, wxID_ANY);
 
 	// 列の定義
-	m_dvlc->AppendTextColumn(_("Record ID"), wxDATAVIEW_CELL_INERT, 75);
-	m_dvlc->AppendTextColumn(_("ID"), wxDATAVIEW_CELL_INERT, 75);
-	m_dvlc->AppendTextColumn(_("Category Name"), wxDATAVIEW_CELL_INERT, 150);
-	m_dvlc->AppendTextColumn(_("Start Time"), wxDATAVIEW_CELL_INERT, 175);
-	m_dvlc->AppendTextColumn(_("Elapsed Time"), wxDATAVIEW_CELL_INERT, 150);
+	m_dvlc->AppendTextColumn(_("Record ID"), wxDATAVIEW_CELL_INERT, FromDIP(75));
+	m_dvlc->AppendTextColumn(_("ID"), wxDATAVIEW_CELL_INERT, FromDIP(75));
+	m_dvlc->AppendTextColumn(_("Category Name"), wxDATAVIEW_CELL_INERT, FromDIP(150));
+	m_dvlc->AppendTextColumn(_("Start Time"), wxDATAVIEW_CELL_INERT, FromDIP(175));
+	m_dvlc->AppendTextColumn(_("Elapsed Time"), wxDATAVIEW_CELL_INERT, FromDIP(150));
 
 	m_dvlc->Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, &Recording::OnSelectionChanged, this); // 行選択イベント
 
@@ -40,11 +40,11 @@ Recording::Recording(wxWindow* parent, Database &dbRef) : wxPanel(parent) , m_db
 	ctrl_sizer->AddStretchSpacer();
 	ctrl_sizer->Add(record_id, 0, wxALIGN_CENTER_VERTICAL);
 	ctrl_sizer->Add(m_st_rid, 0, wxALIGN_CENTER_VERTICAL);
-	ctrl_sizer->AddSpacer(10);
-	ctrl_sizer->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
-	ctrl_sizer->Add(m_btn_stop, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
+	ctrl_sizer->AddSpacer(FromDIP(10));
+	ctrl_sizer->Add(m_btn_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+	ctrl_sizer->Add(m_btn_stop, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
 
-	sizer->Add(ctrl_sizer, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(ctrl_sizer, 0, wxEXPAND | wxALL, FromDIP(10));
 	SetSizer(sizer);
 }
 

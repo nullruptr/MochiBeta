@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
+#include <wx/regex.h>
 #include "mainwnd.hpp"
 #include "gui/mainwnd/activity_report/activity_report.hpp"
 #include "gui/mainwnd/dashboard/dashboard.hpp"
@@ -10,14 +11,14 @@
 #include "gui/mainwnd/treectrl/treectrl.hpp"
 
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
-	wxDefaultPosition, wxSize(2000,1200),
-	wxDEFAULT_FRAME_STYLE) {
-	/*
+	wxDefaultPosition) {
+	
 	wxLog::SetLogLevel(wxLOG_Max);
 	wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
 	wxLogMessage("Log System Initialized.");
-	*/
+
         // notify wxAUI which frame to use
+	SetSize(FromDIP(wxSize(1400, 800)));
         m_mgr.SetManagedWindow(this);
 
 	// メニュー内容の設定
@@ -79,14 +80,14 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	    .CaptionVisible(false)       // 時計にタイトルバーは不要なので false
 	    .CloseButton(false)          // 閉じられないように設定
 	    .DockFixed()                 // 位置を固定したい場合
-	    .BestSize(-1, 40)            // 高さを 40px 程度に固定
+	    .BestSize(-1, FromDIP(33))            // 高さを 40px 程度に固定
 	);
 	
 	m_mgr.AddPane(m_recording, wxAuiPaneInfo()
         .Bottom()
         .Caption(_("Recording"))
         .Name(wxT("Recording_wnd"))
-        .BestSize(500, 500)
+        .BestSize(FromDIP(333), FromDIP(333))
         .Layer(0)
 	.Position(0)
 	.PaneBorder(true)
@@ -97,7 +98,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Left()
         .Caption(_("Categories"))
         .Name(wxT("treePane"))
-        .BestSize(250, -1)
+        .BestSize(FromDIP(166), -1)
         .Layer(1)
 	.Position(0)
 	.Row(0) // 左側のエリアの 0番目
@@ -108,7 +109,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Right()
         .Caption(_("Activity Report"))
         .Name(wxT("Activity Report"))
-        .BestSize(600, -1)
+        .BestSize(FromDIP(400), -1)
         .Layer(1)
 	.CloseButton(false) // 閉じるボタン無効
 	); 
@@ -117,7 +118,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Left()
         .Caption(_("Inspector"))
         .Name(wxT("Inspector"))
-        .BestSize(250, -1)
+        .BestSize(FromDIP(166), -1)
         .Layer(1)
 	.Position(0) 
 	.Row(1) // 左側のエリアの 1番目
@@ -128,7 +129,7 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
         .Left()
         .Caption(_("Statistic"))
         .Name(wxT("Statistic"))
-        .BestSize(250, -1)
+        .BestSize(FromDIP(166), -1)
         .Layer(1)
 	.Row(0)
 	.Position(1) 
@@ -150,6 +151,8 @@ Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	
         // tell the manager to "commit" all the changes just made
         m_mgr.Update();
+	// 高DPI対応
+	Bind(wxEVT_DPI_CHANGED, &Mainwnd::OnDPIChanged, this);
     }
 
 void Mainwnd::OnQuit(wxCommandEvent& WXUNUSED(event)){ // 終了確認
@@ -214,6 +217,63 @@ void Mainwnd::OnConnectDB(wxCommandEvent& event){
 			wxMessageBox(_("Connection failed"));
 		}
 	}
+}
+
+void Mainwnd::OnDPIChanged(wxDPIChangedEvent& event) {
+	if (m_dpiChanging) { event.Skip(); return; }
+
+    const wxSize oldDPI = event.GetOldDPI();
+    const wxSize newDPI = event.GetNewDPI();
+    if (oldDPI.x == newDPI.x) { event.Skip(); return; }
+
+    m_dpiChanging = true;
+    wxLogDebug("=== DPI Changed === %d -> %d", oldDPI.x, newDPI.x);
+
+    const double scale = (double)newDPI.x / oldDPI.x;
+
+    // BestSize を新 DPI で更新
+    auto updatePane = [&](const wxString& name, int newBestW, int newBestH) {
+        wxAuiPaneInfo& p = m_mgr.GetPane(name);
+        if (!p.IsOk()) return;
+        p.BestSize(newBestW, newBestH);
+    };
+
+    updatePane(wxT("clockPane"),       -1,           FromDIP(33));
+    updatePane(wxT("Recording_wnd"),   FromDIP(333), FromDIP(333));
+    updatePane(wxT("treePane"),        FromDIP(166), -1);
+    updatePane(wxT("Activity Report"), FromDIP(400), -1);
+    updatePane(wxT("Inspector"),       FromDIP(166), -1);
+    updatePane(wxT("Statistic"),       FromDIP(166), -1);
+
+    // Perspective の dock_size をスケーリングして書き換え
+    wxString perspective = m_mgr.SavePerspective();
+    wxLogDebug("Before: %s", perspective);
+
+    wxString result;
+    wxString src = perspective;
+    wxRegEx re("dock_size\\(([^)]+)\\)=([0-9]+)");
+
+    while (!src.IsEmpty()) {
+        size_t start, len;
+        if (re.Matches(src) && re.GetMatch(&start, &len, 0)) {
+            result += src.Left(start);
+            wxString args = re.GetMatch(src, 1);
+            long oldVal;
+            re.GetMatch(src, 2).ToLong(&oldVal);
+            long newVal = (long)(oldVal * scale);
+            result += wxString::Format("dock_size(%s)=%ld", args, newVal);
+            src = src.Mid(start + len);
+        } else {
+            result += src;
+            break;
+        }
+    }
+
+    wxLogDebug("After: %s", result);
+    m_mgr.LoadPerspective(result, true);
+
+    m_dpiChanging = false;
+    event.Skip();
 }
 
 // --- 以下イベント転送 ---

@@ -14,12 +14,12 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     m_list = new wxListCtrl(this, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
                             wxLC_REPORT | wxLC_HRULES | wxLC_VRULES);
-    m_list->InsertColumn(0, _("ID"), wxLIST_FORMAT_LEFT, 50);
-    m_list->InsertColumn(1, _("Path"), wxLIST_FORMAT_LEFT, 200);
-    m_list->InsertColumn(2, _("Category"), wxLIST_FORMAT_LEFT, 120);
-    m_list->InsertColumn(3, _("Total Time"), wxLIST_FORMAT_LEFT, 100);
-    m_list->InsertColumn(4, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, 80);
-    sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
+    m_list->InsertColumn(0, _("ID"), wxLIST_FORMAT_LEFT, FromDIP(33));
+    m_list->InsertColumn(1, _("Path"), wxLIST_FORMAT_LEFT, FromDIP(133));
+    m_list->InsertColumn(2, _("Category"), wxLIST_FORMAT_LEFT, FromDIP(80));
+    m_list->InsertColumn(3, _("Total Time"), wxLIST_FORMAT_LEFT, FromDIP(66));
+    m_list->InsertColumn(4, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, FromDIP(30));
+    sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(6));
 
     // --- 下部: 合計表示 ---
     m_total_label = new wxStaticText(this, wxID_ANY, _("Total: 00:00:00"));

@@ -49,14 +49,14 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	// デフォルトでチェックあり
 	m_cb_auto_update->SetValue(true);
 
-	range_sizer->Add(date_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	range_sizer->Add(date_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
 	range_sizer->Add(m_date_range, 0, wxALIGN_CENTER_VERTICAL);
-	range_sizer->Add(m_period_display, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
-	range_sizer->Add(m_date_picker_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-	range_sizer->Add(m_date_picker_end, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-	range_sizer->Add(m_btn_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-	range_sizer->Add(m_cb_auto_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-	sizer->Add(range_sizer, 0, wxALL, 10);
+	range_sizer->Add(m_period_display, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+	range_sizer->Add(m_date_picker_start, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+	range_sizer->Add(m_date_picker_end, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+	range_sizer->Add(m_btn_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+	range_sizer->Add(m_cb_auto_update, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+	sizer->Add(range_sizer, 0, wxALL, FromDIP(10));
 
 
 		// --- オフセット操作エリア ---
@@ -64,7 +64,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	wxFlexGridSizer* offset_grid = new wxFlexGridSizer(3, 3, 5, 5);
 
 	// ボタンのサイズ規定（小さく設定）
-	wxSize btn_size(50, 30);
+	wxSize btn_size(FromDIP(33), FromDIP(20));
 
 	// --- 年 ---
 	wxStaticText* label_y = new wxStaticText(this, wxID_ANY, _("Year: "));
@@ -94,7 +94,7 @@ Dashboard::Dashboard(wxWindow* parent, Database &dbRef)
 	offset_grid->Add(m_btn_offset_d_prev);
 	offset_grid->Add(m_btn_offset_d_next);
 
-	sizer->Add(offset_grid, 0, wxALL, 10);
+	sizer->Add(offset_grid, 0, wxALL, FromDIP(10));
 
 	this->SetSizer(sizer);
 

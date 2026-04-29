@@ -27,7 +27,7 @@ Inspector::Inspector(wxWindow* parent, Database &dbRef)
 	inspector_grid->Add(m_st_path, 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	inspector_grid->Add(m_label_path, 0, wxALL | wxALIGN_CENTER_VERTICAL);
 
-	sizer->Add(inspector_grid, 1, wxALL | wxEXPAND, 5);
+	sizer->Add(inspector_grid, 1, wxALL | wxEXPAND, FromDIP(5));
 	SetSizer(sizer);
 	sizer->Fit(this);
 

@@ -36,6 +36,7 @@ Mainwnd(wxWindow* parent);
 	void OnTodo(wxCommandEvent &event); // 終了インベント処理
 	void OnTimeLog(wxCommandEvent &event); // 時間記録画面を開く
 	void OnConnectDB(wxCommandEvent &event);
+	void OnDPIChanged(wxDPIChangedEvent& event);
 	Database db;
 	wxString current_DB_Path;
 	void OnCategorySelected(wxCommandEvent& event); // Dashboard のID と CatName の表示更新。Dashboardに渡す
@@ -54,4 +55,5 @@ private:
 	ActivityReport* m_activity_report;
 	Inspector* m_inspector;
 	Statistic* m_statistic;
+	bool m_dpiChanging = false;
 };
