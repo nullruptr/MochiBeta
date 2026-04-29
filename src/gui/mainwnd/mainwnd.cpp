@@ -13,10 +13,11 @@
 Mainwnd::Mainwnd(wxWindow* parent) : wxFrame(parent, wxID_ANY, _("wxAUI Test"),
 	wxDefaultPosition) {
 	
+	/*
 	wxLog::SetLogLevel(wxLOG_Max);
 	wxLog::SetActiveTarget(new wxLogWindow(this, "Debug Log", true));
 	wxLogMessage("Log System Initialized.");
-
+	*/
         // notify wxAUI which frame to use
 	SetSize(FromDIP(wxSize(1400, 800)));
         m_mgr.SetManagedWindow(this);
