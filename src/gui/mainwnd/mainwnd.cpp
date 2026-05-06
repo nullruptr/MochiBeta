@@ -221,39 +221,42 @@ void Mainwnd::OnConnectDB(wxCommandEvent& event){
 }
 
 void Mainwnd::OnDPIChanged(wxDPIChangedEvent& event) {
-	if (m_dpiChanging) { event.Skip(); return; }
+    if (m_dpiChanging) {
+        event.Skip();
+        return;
+    }
 
     const wxSize oldDPI = event.GetOldDPI();
     const wxSize newDPI = event.GetNewDPI();
-    if (oldDPI.x == newDPI.x) { event.Skip(); return; }
+
+    if (oldDPI.x == newDPI.x) {
+        event.Skip();
+        return;
+    }
 
     m_dpiChanging = true;
     wxLogDebug("=== DPI Changed === %d -> %d", oldDPI.x, newDPI.x);
 
+    // 現在の実サイズから best_size を再取得
+    wxAuiPaneInfoArray panes = m_mgr.GetAllPanes();
+    for (size_t i = 0; i < panes.GetCount(); i++) {
+    wxAuiPaneInfo& pinfo = panes.Item(i);
+    if (!pinfo.window) continue;
+    wxAuiPaneInfo& p = m_mgr.GetPane(pinfo.name);
+    if (!p.IsOk()) continue;
+    p.best_size = pinfo.window->GetSize();
+    p.best_size.IncTo(pinfo.window->GetBestSize());
+    p.best_size.IncTo(pinfo.min_size);
+    wxLogDebug("UPDATE [%s] best=(%d,%d)",
+        p.name, p.best_size.x, p.best_size.y);
+}
+
+    // dock_size も Perspective 経由でスケーリング
     const double scale = (double)newDPI.x / oldDPI.x;
-
-    // BestSize を新 DPI で更新
-    auto updatePane = [&](const wxString& name, int newBestW, int newBestH) {
-        wxAuiPaneInfo& p = m_mgr.GetPane(name);
-        if (!p.IsOk()) return;
-        p.BestSize(newBestW, newBestH);
-    };
-
-    updatePane(wxT("clockPane"),       -1,           FromDIP(33));
-    updatePane(wxT("Recording_wnd"),   FromDIP(333), FromDIP(333));
-    updatePane(wxT("treePane"),        FromDIP(166), -1);
-    updatePane(wxT("Activity Report"), FromDIP(400), -1);
-    updatePane(wxT("Inspector"),       FromDIP(166), -1);
-    updatePane(wxT("Statistic"),       FromDIP(166), -1);
-
-    // Perspective の dock_size をスケーリングして書き換え
     wxString perspective = m_mgr.SavePerspective();
-    wxLogDebug("Before: %s", perspective);
-
+    wxRegEx re("dock_size\\(([^)]+)\\)=([0-9]+)");
     wxString result;
     wxString src = perspective;
-    wxRegEx re("dock_size\\(([^)]+)\\)=([0-9]+)");
-
     while (!src.IsEmpty()) {
         size_t start, len;
         if (re.Matches(src) && re.GetMatch(&start, &len, 0)) {
@@ -261,8 +264,7 @@ void Mainwnd::OnDPIChanged(wxDPIChangedEvent& event) {
             wxString args = re.GetMatch(src, 1);
             long oldVal;
             re.GetMatch(src, 2).ToLong(&oldVal);
-            long newVal = (long)(oldVal * scale);
-            result += wxString::Format("dock_size(%s)=%ld", args, newVal);
+            result += wxString::Format("dock_size(%s)=%ld", args, (long)(oldVal * scale));
             src = src.Mid(start + len);
         } else {
             result += src;
@@ -270,7 +272,6 @@ void Mainwnd::OnDPIChanged(wxDPIChangedEvent& event) {
         }
     }
 
-    wxLogDebug("After: %s", result);
     m_mgr.LoadPerspective(result, true);
 
     m_dpiChanging = false;
