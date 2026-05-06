@@ -18,7 +18,7 @@ ActivityReport::ActivityReport(wxWindow* parent, Database& dbRef)
     m_list->InsertColumn(1, _("Path"), wxLIST_FORMAT_LEFT, FromDIP(133));
     m_list->InsertColumn(2, _("Category"), wxLIST_FORMAT_LEFT, FromDIP(80));
     m_list->InsertColumn(3, _("Total Time"), wxLIST_FORMAT_LEFT, FromDIP(66));
-    m_list->InsertColumn(4, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, FromDIP(30));
+    m_list->InsertColumn(4, _("Ratio (%)"), wxLIST_FORMAT_RIGHT, FromDIP(50));
     sizer->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(6));
 
     // --- 下部: 合計表示 ---
