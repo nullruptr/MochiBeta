@@ -217,16 +217,6 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 	if (m_cb_auto_update->GetValue()) {
 		wxCommandEvent evt_update;
 		OnUpdateStatistics(evt_update, EventType::FROM_MYSELF);
-
-		// activity report 更新イベントを投げる
-		wxCommandEvent evt_activity_report(wxEVT_MENU, ID_ACTIVITY_REPORT);
-		evt_activity_report.SetEventObject(this);
-		wxPostEvent(GetParent(), evt_activity_report);
-		
-		// statistic に 更新イベントを投げる
-		wxCommandEvent evt_statistic(wxEVT_MENU, ID_UPDATE_STATISTIC);
-		evt_activity_report.SetEventObject(this);
-		wxPostEvent(GetParent(), evt_activity_report);
 	}
 
 	this->GetSizer()->Layout();
@@ -234,7 +224,6 @@ void Dashboard::OnRangeChanged(wxCommandEvent& event) {
 
 
 void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
-	if (m_selected_id == -1) return;
 
 	// RANGE_CUSTOM の場合、ボタンを押した瞬間の Picker の値を再取得する
 	if (m_date_range->GetSelection() == RANGE_CUSTOM) {
@@ -250,21 +239,25 @@ void Dashboard::OnUpdateStatistics(wxCommandEvent& event, EventType type) {
 	// 全範囲の合計時間取得用
 	std::string start_utc_all = "1970-01-01 00:00:00";
 
-	// DBへ
-	long long total_sec = m_db.GetTotalTime(m_selected_id, start_utc, end_utc);
-	long long total_sec_all = m_db.GetTotalTime(m_selected_id, start_utc_all, end_utc);
-
-	// 表示
-	// 分と秒は2桁固定
-	m_result_total_time_range->SetLabel(TimeUtils::FormatSeconds(total_sec));
-	m_result_total_time_all->SetLabel(TimeUtils::FormatSeconds(total_sec_all));
+	if (m_selected_id != -1)
+	{
+	    // DBへ
+	    long long total_sec = m_db.GetTotalTime(m_selected_id, start_utc, end_utc);
+	    long long total_sec_all = m_db.GetTotalTime(m_selected_id, start_utc_all, end_utc);
+	};
 
 	// 表示内容更新イベント
 	// 無限ループ防止のために、MAINWND から更新処理が来たら、除外する
 	if (type == EventType::FROM_MYSELF) {
-		wxCommandEvent evt(wxEVT_MENU, ID_UPDATE_STATISTIC);
-		evt.SetEventObject(this);
-		wxPostEvent(GetParent(), evt);
+		// activity report 更新イベントを投げる
+		wxCommandEvent evt_activity_report(wxEVT_MENU, ID_ACTIVITY_REPORT);
+		evt_activity_report.SetEventObject(this);
+		wxPostEvent(GetParent(), evt_activity_report);
+		
+		// statistic に 更新イベントを投げる
+		wxCommandEvent evt_statistic(wxEVT_MENU, ID_UPDATE_STATISTIC);
+		evt_statistic.SetEventObject(this);
+		wxPostEvent(GetParent(), evt_statistic);
 	}
 }
 
