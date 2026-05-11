@@ -1,4 +1,8 @@
 # Neovim 補完用のjsonファイルを作る
 # make -f Makefile.ccmd ccmd
 ccmd:
-	cmake -B build-linux -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+	rm -rf build-linux
+	mkdir build-linux
+	cd build-linux
+	cmake .. -DLINUX_BUILD=ON
+	cmake --build .
