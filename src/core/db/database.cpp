@@ -15,7 +15,7 @@ Database::Database() : db(nullptr) {
 }
 
 Database::~Database(){ // 終了時処理。安全のため、デストラクタでもクローズ。
-    sql.close();
+    Close();
 }
 
 bool Database::Connect(const std::string& path) { // DB に接続 
@@ -24,8 +24,16 @@ bool Database::Connect(const std::string& path) { // DB に接続
 	if (sql.get_backend() != nullptr) {
 	    sql.close();
 	}
+	// sqlite3.h 用の互換対応
+	if (db != nullptr) {
+            sqlite3_close_v2(db);
+            db = nullptr;
+        }
 
 	sql.open(soci::sqlite3, path);
+
+	// 同じく，互換対応
+	sqlite3_open_v2(path.c_str(), &db, SQLITE_OPEN_READWRITE, nullptr);
 
 	// 外部キー制約を有効化
 	sql << "PRAGMA foreign_keys = ON";
@@ -520,4 +528,5 @@ void Database::Close() { // 閉じる
 		sqlite3_close_v2(db);
 		db = nullptr;
 	}
+    sql.close();
 }
