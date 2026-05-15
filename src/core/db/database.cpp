@@ -234,7 +234,7 @@ bool Database::GetAllCategories(std::vector<Category> &out){ // 全カテゴリ�
 
     try {
 	soci::rowset<soci::row> rs = (sql.prepare <<
-	    "SELECT id, parent_id, name, is_folder FROM categories WHERE is_hidden = 0 ORDER BY name ASC;");
+	    "SELECT id, parent_id, name, is_folder FROM categories WHERE is_hidden = 0 ORDER BY is_folder DESC, name ASC;");
 
 	for (auto it = rs.begin(); it != rs.end(); ++it) {
 	    const soci::row& row = *it;
