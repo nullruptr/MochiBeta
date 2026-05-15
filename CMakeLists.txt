@@ -96,6 +96,7 @@ target_compile_features(MochiBeta PUBLIC cxx_std_14)
 
 # --- 7. インクルード ---
 if(NOT LINUX_BUILD)
+    target_compile_options(MochiBeta PRIVATE "-finput-charset=UTF-8" "-fexec-charset=UTF-8")
     target_include_directories(MochiBeta PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         /usr/x86_64-w64-mingw32/include
@@ -116,7 +117,7 @@ if(NOT LINUX_BUILD)
         ${SQLITE3_LIB}
     )
     set_target_properties(MochiBeta PROPERTIES
-        LINK_FLAGS "--enable-utf8 -static -static-libgcc -static-libstdc++"
+        LINK_FLAGS "-static -static-libgcc -static-libstdc++"
     )
 else()
     target_link_libraries(MochiBeta
