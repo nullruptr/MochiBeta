@@ -1,16 +1,17 @@
-# ER
+# ERD
 
 ```mermaid
 erDiagram
     categories ||--o{ records : "実績時間の記録"
-    categories ||--o{ todo : "カテゴリ分類"
-    todo ||--o{ records : "特定のタスクに対する実績"
+    categories ||--o{ todo : ""
+    todo ||--o{ records : "TODOと時間記録の関連付け(あれば)"
 
     categories {
         integer id PK
         integer parent_id FK "id から親参照"
         text name
         integer is_hidden
+        integer is_folder
     }
 
     records {
@@ -25,7 +26,7 @@ erDiagram
     todo {
         integer id PK
         integer category_id FK
-        integer status "0:未完了, 1:完了"
+        integer status "0:未完了，1:完了"
         integer priority
         text todo_name
         text start_time

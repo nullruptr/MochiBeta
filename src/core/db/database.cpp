@@ -63,7 +63,8 @@ bool Database::Initialize(){
 		"id INTEGER PRIMARY KEY AUTOINCREMENT," // 整数、主キー、連番(INSERT時に id を書く必要がなくなる)
 		"parent_id INTEGER," // 親子関係を識別する
 		"name TEXT NOT NULL," // カテゴリ名。TEXT->文字列型、NOT NULL -> 空欄禁止（何かしら値を入れる）
-		"is_hidden INTEGER DEFAULT 0" // 表示モード
+		"is_hidden INTEGER DEFAULT 0," // 表示モード
+		"is_folder INTEGER DEFAULT 0" // 0: タスク，1:フォルダ
 		")"
 		";"
 
