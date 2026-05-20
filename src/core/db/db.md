@@ -11,7 +11,7 @@ erDiagram
         integer parent_id FK "id から親参照"
         text name
         integer is_hidden
-        integer is_folder
+        integer is_folder "0:タスク，1:フォルダ"
     }
 
     records {
